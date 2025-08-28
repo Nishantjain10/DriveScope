@@ -82,12 +82,12 @@ export default function Home() {
       style={{ marginBottom: `${detailHeight}px` }}
     >
       <div className="mt-25 flex w-full max-w-[40em] items-center justify-center lg:mt-34">
-        {/* Google Drive Logo */}
+        {/* Stack AI Logo */}
         <div className="rounded-[25%] border border-[#19191C0A] bg-[#F9F9FA] p-3 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
           <div className="rounded-[25%] border border-[#FAFAFB] bg-white p-5 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] lg:p-9">
             <Image
-              alt="Google Drive logo"
-              src="/drive.svg"
+              alt="Stack AI logo"
+              src="/stackai.svg"
               width={56}
               height={56}
             />
@@ -107,12 +107,12 @@ export default function Home() {
           <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-400 to-zinc-400/15 connection-line-animate origin-right"></div>
         </div>
         
-        {/* Stack AI Logo */}
+        {/* Google Drive Logo */}
         <div className="rounded-[25%] border border-[#19191C0A] bg-[#F9F9FA] p-3 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
           <div className="rounded-[25%] border border-[#FAFAFB] bg-white p-5 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] lg:p-9">
           <Image
-              alt="Stack AI logo"
-              src="/stackai.svg"
+              alt="Google Drive logo"
+              src="/drive.svg"
               width={56}
               height={56}
             />

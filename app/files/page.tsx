@@ -1,5 +1,6 @@
 "use client";
 
+import "../app.css";
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -101,9 +102,14 @@ export default function FilesPage() {
     });
 
   return (
-    <div className="files-page bg-[#FAFAFB] min-h-screen">
-      {/* Google Drive-like Header */}
-      <div className="drive-header bg-white border-b border-[#EDEDF0] px-6 py-4">
+    <div className="files-page checker-background bg-[#FAFAFB] min-h-screen p-5 relative">
+      {/* Elegant Bordered Container */}
+      <div className="max-w-6xl mx-auto mt-8">
+        <div className="rounded-lg border border-[#19191C0A] bg-[#F9F9FA] p-4 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
+          <div className="rounded-lg border border-[#FAFAFB] bg-white shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] overflow-hidden">
+            
+            {/* Google Drive-like Header */}
+            <div className="drive-header bg-white border-b border-[#EDEDF0] px-6 py-4">
         <div className="header-content flex items-center justify-between">
           <div className="header-left flex items-center gap-4">
             <Link href="/" className="back-button text-[#5F6368] hover:text-zinc-700 transition-colors">
@@ -153,8 +159,8 @@ export default function FilesPage() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="search-section bg-white border-b border-[#EDEDF0] px-6 py-3">
+            {/* Search Bar */}
+            <div className="search-section bg-white border-b border-[#EDEDF0] px-6 py-3">
         <div className="search-container max-w-2xl">
           <FileSearchBar
             onFiltersChange={handleFiltersChange}
@@ -164,18 +170,18 @@ export default function FilesPage() {
         </div>
       </div>
 
-      {/* Connection Status */}
-      {connectionsError && (
-        <div className="error-banner bg-[#FEF7E0] border-l-4 border-[#F9AB00] px-6 py-3">
+            {/* Connection Status */}
+            {connectionsError && (
+              <div className="error-banner bg-[#FEF7E0] border-l-4 border-[#F9AB00] px-6 py-3">
           <div className="error-content flex items-center gap-2 text-[#B06000]">
             <span className="error-icon">⚠️</span>
             <span>Connection Error: {connectionsError.message}</span>
           </div>
-        </div>
-      )}
+              </div>
+            )}
 
-      {/* File Content */}
-      <div className="file-content flex-1 px-6 py-4">
+            {/* File Content */}
+            <div className="file-content flex-1 px-6 py-4">
         {connectionsLoading ? (
           <div className="loading-state flex items-center justify-center py-12">
             <div className="loading-content flex items-center gap-3 text-[#5F6368]">
@@ -333,6 +339,8 @@ export default function FilesPage() {
             ))}
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );
