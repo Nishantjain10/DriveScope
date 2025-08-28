@@ -16,9 +16,15 @@ export function DevModeToggle() {
   const [isDevMode, setIsDevMode] = useState(false);
 
   useEffect(() => {
-    // Check initial state
+    // Check initial state - prioritize manual override over NODE_ENV
     const stored = localStorage.getItem('forceDevMode');
-    setIsDevMode(stored === 'true' || process.env.NODE_ENV === 'development');
+    if (stored !== null) {
+      // User has manually set a preference
+      setIsDevMode(stored === 'true');
+    } else {
+      // Default to NODE_ENV only if no manual preference
+      setIsDevMode(process.env.NODE_ENV === 'development');
+    }
   }, []);
 
   const handleToggle = (checked: boolean) => {

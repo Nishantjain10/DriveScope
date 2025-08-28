@@ -14,7 +14,7 @@ const isManuallyEnabled = () => {
   return false;
 };
 
-export const DEV_MODE = process.env.NODE_ENV === 'development' || isManuallyEnabled();
+export const DEV_MODE = isManuallyEnabled() || process.env.NODE_ENV === 'development';
 
 // Mock auth token for development
 export const MOCK_AUTH_TOKEN = 'mock_dev_token_do_not_use_in_production';
