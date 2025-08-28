@@ -23,10 +23,12 @@ import {
   checkIndexingStatus
 } from '@/lib/api/knowledge-base';
 import { FileSearchParams, CreateFileRequest, DeleteFileRequest } from '@/lib/types/api';
+import { stackAIClient } from '@/lib/api/stack-ai-client';
 
 // Query Keys
 export const fileQueryKeys = {
   all: ['files'] as const,
+  auth: () => ['auth'] as const,
   connections: () => [...fileQueryKeys.all, 'connections'] as const,
   lists: () => [...fileQueryKeys.all, 'lists'] as const,
   list: (connectionId: string, params?: FileSearchParams) => 
@@ -42,13 +44,45 @@ export const fileQueryKeys = {
 };
 
 /**
- * Get Google Drive connections
+ * Authentication hook
+ */
+export function useAuthentication() {
+  return useMutation({
+    mutationFn: async () => {
+      console.log('🔐 Starting authentication...');
+      return await stackAIClient.authenticateWithTestCredentials();
+    },
+    onSuccess: () => {
+      console.log('✅ Authentication successful');
+    },
+    onError: (error) => {
+      console.error('❌ Authentication failed:', error);
+    },
+  });
+}
+
+/**
+ * Get Google Drive connections (requires authentication)
  */
 export function useConnections() {
   return useQuery({
     queryKey: fileQueryKeys.connections(),
-    queryFn: getConnections,
+    queryFn: async () => {
+      console.log('📂 Fetching connections...');
+      
+      // Check if already authenticated
+      if (!stackAIClient.isAuthenticated()) {
+        console.log('🔑 Not authenticated, authenticating first...');
+        await stackAIClient.authenticateWithTestCredentials();
+      }
+      
+      return getConnections();
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error) => {
+      console.log(`❌ Connection attempt ${failureCount + 1} failed:`, error);
+      return failureCount < 2; // Retry up to 2 times
+    },
   });
 }
 
@@ -236,9 +270,9 @@ export function useDeleteFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ knowledgeBaseId, resourcePath }: DeleteFileRequest & { knowledgeBaseId: string }) =>
-      deleteFile(knowledgeBaseId, { resource_path: resourcePath }),
-    onMutate: async ({ knowledgeBaseId, resourcePath }) => {
+    mutationFn: ({ knowledgeBaseId, resource_path }: DeleteFileRequest & { knowledgeBaseId: string }) =>
+      deleteFile(knowledgeBaseId, { resource_path }),
+    onMutate: async ({ knowledgeBaseId, resource_path }) => {
       // Optimistic update - remove from UI immediately
       const queryKey = fileQueryKeys.knowledgeBase(knowledgeBaseId);
       await queryClient.cancelQueries({ queryKey });
@@ -248,7 +282,7 @@ export function useDeleteFile() {
       queryClient.setQueryData(queryKey, (old: any) => ({
         ...old,
         data: old?.data?.filter((file: any) => 
-          file.inode_path.path !== resourcePath
+          file.inode_path.path !== resource_path
         ) || []
       }));
 

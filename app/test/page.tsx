@@ -8,16 +8,34 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FileSearchBar, type FileSearchFilters } from "@/components/ui/file-search-bar"
-import { useConnections } from "@/hooks/use-files"
-import { FileIcon, FolderIcon, Search, Settings, Loader2 } from "lucide-react"
+import { useConnections, useAuthentication } from "@/hooks/use-files"
+import { FileIcon, FolderIcon, Search, Settings, Loader2, Key, RefreshCw } from "lucide-react"
 
 export default function TestPage() {
   const handleFiltersChange = (filters: FileSearchFilters) => {
     console.log('Search filters changed:', filters);
   };
 
-  // Test API integration (will show loading state since we're not authenticated)
-  const { data: connections, isLoading: connectionsLoading, error: connectionsError } = useConnections();
+  // Authentication hook
+  const authentication = useAuthentication();
+  
+  // Test API integration 
+  const { 
+    data: connections, 
+    isLoading: connectionsLoading, 
+    error: connectionsError,
+    refetch: refetchConnections 
+  } = useConnections();
+
+  const handleTestAuth = () => {
+    console.log('🧪 Testing authentication...');
+    authentication.mutate();
+  };
+
+  const handleRefreshConnections = () => {
+    console.log('🔄 Refreshing connections...');
+    refetchConnections();
+  };
 
   return (
     <div className="test-page min-h-screen bg-background p-8">
@@ -236,10 +254,67 @@ export default function TestPage() {
         <CardHeader>
           <CardTitle className="card-title">API Integration Test</CardTitle>
           <CardDescription>
-            Testing Google Drive connections (requires authentication)
+            Testing Google Drive connections with authentication
           </CardDescription>
         </CardHeader>
-        <CardContent className="card-content">
+        <CardContent className="card-content space-y-4">
+          
+          {/* Test Buttons */}
+          <div className="test-buttons flex flex-wrap gap-2">
+            <Button 
+              onClick={handleTestAuth}
+              disabled={authentication.isPending}
+              className="auth-test-btn"
+              variant="outline"
+            >
+              {authentication.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Key className="w-4 h-4 mr-2" />
+              )}
+              Test Authentication
+            </Button>
+            
+            <Button 
+              onClick={handleRefreshConnections}
+              disabled={connectionsLoading}
+              className="refresh-btn"
+              variant="outline"
+            >
+              {connectionsLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              Refresh Connections
+            </Button>
+          </div>
+
+          {/* Authentication Status */}
+          {authentication.isPending && (
+            <div className="auth-loading flex items-center gap-2 text-blue-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Authenticating with Stack AI...</span>
+            </div>
+          )}
+
+          {authentication.isSuccess && (
+            <Alert className="success-alert">
+              <AlertDescription className="alert-text">
+                ✅ Authentication successful! Access token received.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {authentication.error && (
+            <Alert className="error-alert">
+              <AlertDescription className="alert-text">
+                ❌ Authentication failed: {authentication.error.message}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Connection Status */}
           {connectionsLoading && (
             <div className="loading-state flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -250,7 +325,11 @@ export default function TestPage() {
           {connectionsError && (
             <Alert className="error-alert">
               <AlertDescription className="alert-text">
-                ❌ Not authenticated. API integration ready for authentication flow.
+                ❌ Connection error: {connectionsError.message}
+                <br />
+                <span className="text-xs mt-1 block">
+                  Check console for detailed error logs and environment variables.
+                </span>
               </AlertDescription>
             </Alert>
           )}
@@ -259,6 +338,10 @@ export default function TestPage() {
             <Alert className="success-alert">
               <AlertDescription className="alert-text">
                 ✅ Found {connections.length} Google Drive connection(s)!
+                <br />
+                <span className="text-xs mt-1 block">
+                  Connection ID: {connections[0].connection_id}
+                </span>
               </AlertDescription>
             </Alert>
           )}
@@ -270,6 +353,18 @@ export default function TestPage() {
               </AlertDescription>
             </Alert>
           )}
+
+          {/* Environment Check */}
+          <div className="env-check bg-muted p-3 rounded-md text-sm">
+            <p className="font-medium mb-2">Environment Check:</p>
+            <ul className="space-y-1 text-xs">
+              <li>API URL: {process.env.NEXT_PUBLIC_STACK_AI_API_URL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_API_URL || 'Not set'}</li>
+              <li>Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL || 'Not set'}</li>
+              <li>Anon Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'} {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set'}</li>
+              <li>Test Email: {process.env.NEXT_PUBLIC_STACK_AI_EMAIL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_EMAIL || 'Not set'}</li>
+              <li>Test Password: {process.env.NEXT_PUBLIC_STACK_AI_PASSWORD ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_PASSWORD ? 'Set' : 'Not set'}</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
