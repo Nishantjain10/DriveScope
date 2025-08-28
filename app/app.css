@@ -1,0 +1,47 @@
+/* Checker background pattern */
+.checker-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(#e6e6e690 1px, transparent 1px),
+    linear-gradient(90deg, #e6e6e690 1px, transparent 1px);
+  background-size: 3.7em 3.7em;
+  mask-image: radial-gradient(ellipse at 50% 40%, black 0%, transparent 55%);
+  z-index: -1;
+  background-position-x: center;
+}
+
+/* Hide default summary marker */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Animation classes */
+.connection-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.connection-line-animate {
+  animation: line-draw 2.5s ease-in-out;
+}
+
+@keyframes line-draw {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}

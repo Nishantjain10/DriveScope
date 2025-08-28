@@ -8,6 +8,19 @@ import {
   AuthCredentials, 
   AuthHeaders
 } from '@/lib/types/api';
+import { 
+  DEV_MODE, 
+  MOCK_AUTH_TOKEN, 
+  MOCK_ORG_ID 
+} from '@/lib/config/development';
+
+// ⚠️ DEVELOPMENT MODE WARNING
+if (DEV_MODE) {
+  console.warn(
+    '⚠️ Running in DEVELOPMENT MODE with mock authentication.\n' +
+    'Make sure to remove development.ts and its imports before deploying to production.'
+  );
+}
 
 class StackAIClient {
   private baseUrl = process.env.NEXT_PUBLIC_STACK_AI_API_URL;
@@ -22,6 +35,17 @@ class StackAIClient {
    * Based on the notebook's get_auth_headers function
    */
   async authenticate(credentials: AuthCredentials): Promise<AuthHeaders> {
+    // ⚠️ DEVELOPMENT MODE: Return mock auth token
+    if (DEV_MODE) {
+      console.info('🔑 [DEV MODE] Using mock authentication');
+      this.authHeaders = {
+        Authorization: `Bearer ${MOCK_AUTH_TOKEN}`,
+      };
+      this.orgId = MOCK_ORG_ID;
+      return this.authHeaders;
+    }
+
+    // PRODUCTION MODE: Real authentication
     if (!this.baseUrl || !this.supabaseAuthUrl || !this.anonKey) {
       throw new ApiError(
         'API configuration missing. Please set NEXT_PUBLIC_STACK_AI_API_URL, NEXT_PUBLIC_SUPABASE_AUTH_URL, and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',
@@ -32,24 +56,48 @@ class StackAIClient {
     try {
       const requestUrl = `${this.supabaseAuthUrl}/auth/v1/token?grant_type=password`;
       
+      // Match notebook's request format exactly
+      const requestBody = {
+        email: credentials.email,  // Don't trim - match notebook exactly
+        password: credentials.password,  // Don't trim - match notebook exactly
+        gotrue_meta_security: {},  // Empty object as in notebook
+      };
+
+      console.log('🔐 Authentication Request:', {
+        url: requestUrl,
+        email: requestBody.email,
+        anon_key_length: this.anonKey.length,
+        body: requestBody,
+      });
+
+      // Use the exact same format as the Python requests library
       const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
+          'Accept': 'application/json',  // Added to match requests library
           'Content-Type': 'application/json',
           'Apikey': this.anonKey,
         },
-        body: JSON.stringify({
-          email: credentials.email,
-          password: credentials.password,
-          gotrue_meta_security: {},
-        }),
+        body: JSON.stringify(requestBody),
+        // Don't add any extra options that aren't in the notebook
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
+        console.error('❌ Authentication Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data,
+        });
         throw new ApiError(`Authentication failed: ${response.statusText}`, response.status);
       }
 
-      const data = await response.json();
+      console.log('✅ Authentication response:', {
+        status: response.status,
+        has_access_token: !!data.access_token,
+      });
+
       const accessToken = data.access_token;
 
       this.authHeaders = {
@@ -61,6 +109,7 @@ class StackAIClient {
 
       return this.authHeaders;
     } catch (error) {
+      console.error('❌ Authentication failed:', error);
       throw new ApiError('Authentication failed', 401, error);
     }
   }

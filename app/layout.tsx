@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { Navigation } from "@/components/ui/navigation";
+
+import { DevModeToggle } from "@/components/ui/dev-mode-toggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DriveScope - File Picker",
-  description: "Custom Google Drive File Picker with indexing capabilities",
+  title: "DriveScope + Stack AI",
+  description: "Google Drive File Picker with Stack AI integration",
 };
 
 export default function RootLayout({
@@ -26,14 +27,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/stackai.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:opsz,wght@14..32,100..900&family=Poppins:wght@300;400&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-[#FAFAFB] font-[Inter] text-sm text-[#56565C] antialiased`}
       >
         <QueryProvider>
-          <Navigation />
-          <main className="main-content">
-            {children}
-          </main>
+          {children}
+          <DevModeToggle />
         </QueryProvider>
       </body>
     </html>

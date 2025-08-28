@@ -13,11 +13,19 @@ import {
   CreateFileRequest,
   DeleteFileRequest
 } from '@/lib/types/api';
+import { DEV_MODE } from '@/lib/config/development';
+import { mockApi } from './mock-api';
 
 /**
  * Get Google Drive connections for the authenticated user
  */
 export async function getConnections(): Promise<Connection[]> {
+  // ⚠️ DEVELOPMENT MODE: Use mock data
+  if (DEV_MODE) {
+    return mockApi.getConnections();
+  }
+
+  // PRODUCTION MODE: Real API call
   const response = await stackAIClient.request<Connection[]>(
     '/connections?connection_provider=gdrive&limit=10'
   );
@@ -32,6 +40,12 @@ export async function listFiles(
   connectionId: string,
   params: FileSearchParams = {}
 ): Promise<PaginatedResponse<FileResource>> {
+  // ⚠️ DEVELOPMENT MODE: Use mock data
+  if (DEV_MODE) {
+    return mockApi.listFiles(params.resource_id);
+  }
+
+  // PRODUCTION MODE: Real API call
   let endpoint = `/connections/${connectionId}/resources/children`;
   
   // Build query parameters
@@ -82,6 +96,12 @@ export async function searchFiles(
   query: string,
   params: Omit<FileSearchParams, 'query'> = {}
 ): Promise<PaginatedResponse<FileResource>> {
+  // ⚠️ DEVELOPMENT MODE: Use mock data
+  if (DEV_MODE) {
+    return mockApi.searchFiles(query);
+  }
+
+  // PRODUCTION MODE: Real API call
   // This would need to be implemented based on Stack AI's search capabilities
   // For now, we'll list all files and filter client-side
   const allFiles = await listFiles(connectionId, params);
