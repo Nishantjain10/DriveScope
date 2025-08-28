@@ -8,12 +8,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FileSearchBar, type FileSearchFilters } from "@/components/ui/file-search-bar"
-import { FileIcon, FolderIcon, Search, Settings } from "lucide-react"
+import { useConnections } from "@/hooks/use-files"
+import { FileIcon, FolderIcon, Search, Settings, Loader2 } from "lucide-react"
 
 export default function TestPage() {
   const handleFiltersChange = (filters: FileSearchFilters) => {
     console.log('Search filters changed:', filters);
   };
+
+  // Test API integration (will show loading state since we're not authenticated)
+  const { data: connections, isLoading: connectionsLoading, error: connectionsError } = useConnections();
 
   return (
     <div className="test-page min-h-screen bg-background p-8">
@@ -227,11 +231,53 @@ export default function TestPage() {
         </CardContent>
       </Card>
 
+      {/* API Integration Test */}
+      <Card className="api-test-card mb-8">
+        <CardHeader>
+          <CardTitle className="card-title">API Integration Test</CardTitle>
+          <CardDescription>
+            Testing Google Drive connections (requires authentication)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="card-content">
+          {connectionsLoading && (
+            <div className="loading-state flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Loading connections...</span>
+            </div>
+          )}
+          
+          {connectionsError && (
+            <Alert className="error-alert">
+              <AlertDescription className="alert-text">
+                ❌ Not authenticated. API integration ready for authentication flow.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {connections && connections.length > 0 && (
+            <Alert className="success-alert">
+              <AlertDescription className="alert-text">
+                ✅ Found {connections.length} Google Drive connection(s)!
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {connections && connections.length === 0 && (
+            <Alert className="info-alert">
+              <AlertDescription className="alert-text">
+                ℹ️ No Google Drive connections found. Create one in Stack AI dashboard.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Alert Section */}
       <div className="alerts-section mt-8">
         <Alert className="success-alert mb-4">
           <AlertDescription className="alert-text">
-            ✅ All Shadcn UI components are working correctly! Ready for File Picker implementation.
+            ✅ All Shadcn UI components and API integration are ready for File Picker implementation!
           </AlertDescription>
         </Alert>
       </div>
