@@ -6,14 +6,13 @@
 
 import { 
   AuthCredentials, 
-  AuthHeaders, 
-  ApiError 
+  AuthHeaders
 } from '@/lib/types/api';
 
 class StackAIClient {
-  private baseUrl = 'https://api.stack-ai.com';
-  private supabaseAuthUrl = 'https://sb.stack-ai.com';
-  private anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZic3VhZGZxaGtseG9rbWxodHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzM0NTg5ODAsImV4cCI6MTk4OTAzNDk4MH0.Xjry9m7oc42_MsLRc1bZhTTzip3srDjJ6fJMkwhXQ9s';
+  private baseUrl = process.env.NEXT_PUBLIC_STACK_AI_API_URL;
+  private supabaseAuthUrl = process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL;
+  private anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
   private authHeaders: AuthHeaders | null = null;
   private orgId: string | null = null;
@@ -23,6 +22,13 @@ class StackAIClient {
    * Based on the notebook's get_auth_headers function
    */
   async authenticate(credentials: AuthCredentials): Promise<AuthHeaders> {
+    if (!this.baseUrl || !this.supabaseAuthUrl || !this.anonKey) {
+      throw new ApiError(
+        'API configuration missing. Please set NEXT_PUBLIC_STACK_AI_API_URL, NEXT_PUBLIC_SUPABASE_AUTH_URL, and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',
+        500
+      );
+    }
+
     try {
       const requestUrl = `${this.supabaseAuthUrl}/auth/v1/token?grant_type=password`;
       
@@ -151,6 +157,30 @@ class StackAIClient {
   logout(): void {
     this.authHeaders = null;
     this.orgId = null;
+  }
+
+  /**
+   * Authenticate with test credentials from the task
+   * Note: In production, these should come from secure environment variables
+   * For this task, the credentials are provided in the task specification
+   */
+  async authenticateWithTestCredentials(): Promise<AuthHeaders> {
+    // These credentials are provided in the task specification for testing
+    // Task file states: Email: stackaitest@gmail.com, Password: !z4ZnxkyLYs#vR
+    const testEmail = process.env.NEXT_PUBLIC_STACK_AI_EMAIL;
+    const testPassword = process.env.NEXT_PUBLIC_STACK_AI_PASSWORD;
+    
+    if (!testEmail || !testPassword) {
+      throw new ApiError(
+        'Test credentials not configured. Please set NEXT_PUBLIC_STACK_AI_EMAIL and NEXT_PUBLIC_STACK_AI_PASSWORD environment variables.',
+        401
+      );
+    }
+    
+    return this.authenticate({
+      email: testEmail,
+      password: testPassword,
+    });
   }
 }
 

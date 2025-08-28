@@ -11,6 +11,7 @@ export interface AuthCredentials {
 
 export interface AuthHeaders {
   Authorization: string;
+  [key: string]: string;
 }
 
 // Resource types from API responses
