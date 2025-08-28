@@ -6,13 +6,21 @@ import { useConnections } from "@/hooks/use-files";
 import Image from "next/image";
 import Link from "next/link";
 
+interface LogEntry {
+  date: Date;
+  method: string;
+  path: string;
+  status: number;
+  response: string;
+}
+
 export default function Home() {
   const [detailHeight, setDetailHeight] = useState(55);
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState("idle");
   const [showLogs, setShowLogs] = useState(false);
 
-  const detailsRef = useRef(null);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
   const { 
     data: connections, 
@@ -66,7 +74,7 @@ export default function Home() {
         method: "GET",
         path: "/connections",
         status: 500,
-        response: err.message || "Connection failed",
+        response: err instanceof Error ? err.message : "Connection failed",
       };
       setLogs((prevLogs) => [log, ...prevLogs]);
       setStatus("error");
