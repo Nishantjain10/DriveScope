@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { SimpleSearchBar, type SearchFilters } from "@/components/ui/simple-search-bar"
+import { FileSearchBar, type FileSearchFilters } from "@/components/ui/file-search-bar"
 import { FileIcon, FolderIcon, Search, Settings } from "lucide-react"
 
 export default function TestPage() {
-  const handleSearch = (filters: SearchFilters) => {
+  const handleFiltersChange = (filters: FileSearchFilters) => {
     console.log('Search filters changed:', filters);
   };
 
@@ -30,14 +30,14 @@ export default function TestPage() {
       {/* File Search Demo */}
       <Card className="search-demo-card mb-8">
         <CardHeader>
-          <CardTitle className="card-title">File Search</CardTitle>
+          <CardTitle className="card-title">File Search & Filters</CardTitle>
           <CardDescription>
-            Clean search interface for Google Drive File Picker
+            Advanced search with filtering and sorting for Google Drive File Picker
           </CardDescription>
         </CardHeader>
         <CardContent className="card-content pt-6">
-          <SimpleSearchBar 
-            onSearch={handleSearch}
+          <FileSearchBar 
+            onFiltersChange={handleFiltersChange}
             placeholder="Search your Google Drive files..."
             className="search-demo"
           />
