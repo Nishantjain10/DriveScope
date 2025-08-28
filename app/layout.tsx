@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 
-import { DevModeToggle } from "@/components/ui/dev-mode-toggle";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -41,7 +39,6 @@ export default function RootLayout({
       >
         <QueryProvider>
           {children}
-          <DevModeToggle />
         </QueryProvider>
       </body>
     </html>

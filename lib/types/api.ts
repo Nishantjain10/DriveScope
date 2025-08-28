@@ -20,6 +20,7 @@ export interface FileResource {
   inode_type: 'file' | 'directory';
   inode_path: {
     path: string;
+    name?: string; // Some APIs might provide name separately
   };
   status?: 'indexed' | 'pending' | 'error' | 'deindexed';
   size?: number;

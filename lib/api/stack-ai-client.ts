@@ -8,19 +8,6 @@ import {
   AuthCredentials, 
   AuthHeaders
 } from '@/lib/types/api';
-import { 
-  DEV_MODE, 
-  MOCK_AUTH_TOKEN, 
-  MOCK_ORG_ID 
-} from '@/lib/config/development';
-
-// ⚠️ DEVELOPMENT MODE WARNING
-if (DEV_MODE) {
-  console.warn(
-    '⚠️ Running in DEVELOPMENT MODE with mock authentication.\n' +
-    'Make sure to remove development.ts and its imports before deploying to production.'
-  );
-}
 
 class StackAIClient {
   private baseUrl = process.env.NEXT_PUBLIC_STACK_AI_API_URL;
@@ -35,17 +22,6 @@ class StackAIClient {
    * Based on the notebook's get_auth_headers function
    */
   async authenticate(credentials: AuthCredentials): Promise<AuthHeaders> {
-    // ⚠️ DEVELOPMENT MODE: Return mock auth token
-    if (DEV_MODE) {
-      console.info('🔑 [DEV MODE] Using mock authentication');
-      this.authHeaders = {
-        Authorization: `Bearer ${MOCK_AUTH_TOKEN}`,
-      };
-      this.orgId = MOCK_ORG_ID;
-      return this.authHeaders;
-    }
-
-    // PRODUCTION MODE: Real authentication
     if (!this.baseUrl || !this.supabaseAuthUrl || !this.anonKey) {
       throw new ApiError(
         'API configuration missing. Please set NEXT_PUBLIC_STACK_AI_API_URL, NEXT_PUBLIC_SUPABASE_AUTH_URL, and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',

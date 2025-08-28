@@ -2,26 +2,16 @@
 
 import "../app.css";
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileSearchBar, type FileSearchFilters } from '@/components/ui/file-search-bar';
-import { DevModeToggle } from '@/components/ui/dev-mode-toggle';
 import { useConnections, useFiles } from '@/hooks/use-files';
 import { 
   FolderIcon, 
   FileIcon, 
   MoreVertical, 
-  Download, 
-  Eye, 
-  Trash2,
-  Plus,
-  Search,
-  Filter,
-  ArrowUpDown,
   RefreshCw,
-  Home,
   ArrowLeft,
   Grid3X3,
   List,
@@ -51,7 +41,6 @@ export default function FilesPage() {
   const { 
     data: filesResponse, 
     isLoading: filesLoading, 
-    error: filesError,
     refetch: refetchFiles 
   } = useFiles(connectionId || '', {});
 
@@ -65,13 +54,19 @@ export default function FilesPage() {
     refetchFiles();
   };
 
+  // Helper function to safely get file name
+  const getFileName = (file: FileResource) => {
+    return file.inode_path?.name || file.inode_path?.path?.split('/').pop() || 'Unknown';
+  };
+
   // Filter and sort files based on search criteria
   const filteredAndSortedFiles = files
     .filter(file => {
       // Apply search query
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
-        if (!file.inode_path.name.toLowerCase().includes(query)) {
+        const fileName = getFileName(file).toLowerCase();
+        if (!fileName.includes(query)) {
           return false;
         }
       }
@@ -92,10 +87,13 @@ export default function FilesPage() {
       let comparison = 0;
       
       if (searchFilters.sortBy === 'name') {
-        comparison = a.inode_path.name.localeCompare(b.inode_path.name);
+        const nameA = getFileName(a);
+        const nameB = getFileName(b);
+        comparison = nameA.localeCompare(nameB);
       } else if (searchFilters.sortBy === 'date') {
-        comparison = new Date(a.updated_at || a.created_at).getTime() - 
-                    new Date(b.updated_at || b.created_at).getTime();
+        const dateA = new Date(a.updated_at || a.created_at || Date.now()).getTime();
+        const dateB = new Date(b.updated_at || b.created_at || Date.now()).getTime();
+        comparison = dateA - dateB;
       }
 
       return searchFilters.sortOrder === 'desc' ? -comparison : comparison;
@@ -258,7 +256,7 @@ export default function FilesPage() {
                         </span>
                         <div className="file-details">
                           <p className="file-name text-[#202124] text-sm">
-                            {file.inode_path.name}
+                            {getFileName(file)}
                           </p>
                         </div>
                       </div>
@@ -267,7 +265,7 @@ export default function FilesPage() {
                       me
                     </TableCell>
                     <TableCell className="modified-cell text-[#5F6368] text-sm">
-                      {new Date(file.updated_at || file.created_at).toLocaleDateString()}
+                      {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="size-cell text-[#5F6368] text-sm">
                       {file.inode_type === 'directory' ? '-' : 'Unknown'}
@@ -315,7 +313,7 @@ export default function FilesPage() {
                     )}
                   </div>
                   <p className="file-name text-sm text-[#202124] truncate">
-                    {file.inode_path.name}
+                    {getFileName(file)}
                   </p>
                   {file.status && (
                     <div className="file-status mt-2">
