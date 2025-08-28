@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,9 +7,14 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { FileSearchBar, type FileSearchFilters } from "@/components/ui/file-search-bar"
 import { FileIcon, FolderIcon, Search, Settings } from "lucide-react"
 
 export default function TestPage() {
+  const handleFiltersChange = (filters: FileSearchFilters) => {
+    console.log('Search filters changed:', filters);
+  };
+
   return (
     <div className="test-page min-h-screen bg-background p-8">
       {/* Header Section */}
@@ -16,9 +23,26 @@ export default function TestPage() {
           DriveScope Component Test
         </h1>
         <p className="page-subtitle text-muted-foreground">
-          Testing Shadcn UI components with Stack AI inspired design
+          Testing UI components for Google Drive File Picker interface
         </p>
       </div>
+
+      {/* File Search Demo */}
+      <Card className="search-demo-card mb-8">
+        <CardHeader>
+          <CardTitle className="card-title">File Search & Filters</CardTitle>
+          <CardDescription>
+            Advanced search component for Google Drive File Picker
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="card-content">
+          <FileSearchBar 
+            onFiltersChange={handleFiltersChange}
+            placeholder="Search your Google Drive files..."
+            className="file-search-demo"
+          />
+        </CardContent>
+      </Card>
 
       {/* Component Grid */}
       <div className="components-grid grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
