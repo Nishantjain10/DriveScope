@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
     Search,
     X,
@@ -65,7 +65,6 @@ export function FileSearchBar({
     placeholder = "Search files and folders..." 
 }: FileSearchBarProps) {
     const [query, setQuery] = useState("");
-    const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState<FileSearchFilters>({
         query: "",
         sortBy: 'name',
@@ -142,38 +141,18 @@ export function FileSearchBar({
                     )}
                 </div>
                 
-                <Button
-                    variant={showFilters ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="filter-toggle-btn"
-                >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
-                </Button>
-
-                {hasActiveFilters && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearSearch}
-                        className="clear-all-btn text-muted-foreground"
-                    >
-                        Clear All
-                    </Button>
-                )}
-            </div>
-
-            {/* Filter Panel */}
-            <AnimatePresence>
-                {showFilters && (
-                    <motion.div
-                        className="filter-panel border rounded-lg p-4 bg-card mb-4"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                    >
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="filter-toggle-btn"
+                        >
+                            <Filter className="w-4 h-4 mr-2" />
+                            Filters
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 p-4" align="end">
                         <div className="filter-content space-y-4">
                             {/* Sort Controls */}
                             <div className="sort-controls">
@@ -253,9 +232,20 @@ export function FileSearchBar({
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                {hasActiveFilters && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearSearch}
+                        className="clear-all-btn text-muted-foreground"
+                    >
+                        Clear All
+                    </Button>
                 )}
-            </AnimatePresence>
+            </div>
 
             {/* Active Filters Summary */}
             {hasActiveFilters && (
