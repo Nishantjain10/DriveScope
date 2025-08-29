@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 import { BreadcrumbNav } from './breadcrumb-nav';
 import { LoadingBar } from './loading-bar';
 import { FileTypeIcon } from './file-type-icon';
@@ -134,16 +134,33 @@ export function FileGridView({
                         handleIndex(file.resource_id);
                       }
                     }}
+                    disabled={
+                      (getDisplayStatus(file) === 'indexed' && deindexMutation.isPending) ||
+                      (getDisplayStatus(file) !== 'indexed' && indexMutation.isPending)
+                    }
+                    className="flex items-center gap-2"
                   >
-                    {getDisplayStatus(file) === 'indexed' ? 'Remove from Knowledge Base' : 'Add to Knowledge Base'}
+                    {getDisplayStatus(file) === 'indexed' ? (
+                      <>
+                        {deindexMutation.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
+                        Remove from Knowledge Base
+                      </>
+                    ) : (
+                      <>
+                        {indexMutation.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
+                        Add to Knowledge Base
+                      </>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemove(file.inode_path.path || file.resource_id);
                     }}
-                    className="text-red-600 focus:text-red-600"
+                    disabled={removeFromListingMutation.isPending}
+                    className="text-red-600 focus:text-red-600 flex items-center gap-2"
                   >
+                    {removeFromListingMutation.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
                     Remove from Listing
                   </DropdownMenuItem>
                 </DropdownMenuContent>
