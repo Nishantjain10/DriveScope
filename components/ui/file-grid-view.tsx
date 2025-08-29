@@ -1,10 +1,12 @@
 "use client";
 
 import React from 'react';
+import { MoreHorizontal } from 'lucide-react';
 import { BreadcrumbNav } from './breadcrumb-nav';
 import { LoadingBar } from './loading-bar';
 import { FileTypeIcon } from './file-type-icon';
 import { FileActions } from './file-actions';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { FileResource } from '@/lib/types/api';
 
 interface FileGridViewProps {
@@ -101,6 +103,53 @@ export function FileGridView({
                 }}
                 className="file-checkbox"
               />
+            </div>
+
+            {/* More Options Menu */}
+            <div className="more-options absolute top-2 right-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="more-options-btn p-1 hover:bg-gray-100 rounded transition-colors"
+                  >
+                    <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (file.inode_type === 'directory') {
+                        navigateToFolder(file.resource_id, getFileName(file));
+                      }
+                    }}
+                  >
+                    Open
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (getDisplayStatus(file) === 'indexed') {
+                        handleDeindex(file.resource_id);
+                      } else {
+                        handleIndex(file.resource_id);
+                      }
+                    }}
+                  >
+                    {getDisplayStatus(file) === 'indexed' ? 'Remove from Knowledge Base' : 'Add to Knowledge Base'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(file.inode_path.path || file.resource_id);
+                    }}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    Remove from Listing
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
             <div className="card-content text-center mt-4">

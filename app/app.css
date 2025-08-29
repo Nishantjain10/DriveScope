@@ -248,3 +248,18 @@ summary::-webkit-details-marker {
   color: white !important;
   border-color: #1e293b !important;
 }
+
+/* More Options Button Styling */
+.more-options-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.more-options-btn:hover {
+  background-color: #F3F4F6;
+}
+
+.more-options-btn:focus {
+  outline: none;
+  background-color: #E5E7EB;
+}
