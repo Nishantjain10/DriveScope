@@ -883,14 +883,26 @@ export function useFileExplorer() {
 
   const isCountingInProgress = useCallback(() => loadingFolders.size > 0, [loadingFolders]);
 
-  // Filter and sort
-  const filteredAndSortedFiles = files
-    .filter(file => {
-      const isInSubfolder = Object.values(folderContents).some(subFiles =>
-        subFiles.some(subFile => subFile.resource_id === file.resource_id)
-      );
-      if (isInSubfolder) return false;
+  // Get all files from all levels (root + nested folders)
+  const getAllFilesFromAllLevels = useCallback(() => {
+    const allFiles = [...files];
+    
+    // Add files from all nested folders
+    Object.values(folderContents).forEach(subFiles => {
+      subFiles.forEach(subFile => {
+        // Only add if not already in the main files array
+        if (!files.some(file => file.resource_id === subFile.resource_id)) {
+          allFiles.push(subFile);
+        }
+      });
+    });
+    
+    return allFiles;
+  }, [files, folderContents]);
 
+  // Filter and sort all files from all levels
+  const filteredAndSortedFiles = getAllFilesFromAllLevels()
+    .filter(file => {
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
         const fileName = getFileName(file).toLowerCase();
@@ -962,6 +974,7 @@ export function useFileExplorer() {
     getDisplayStatus,
     getStatusBadgeVariant,
     getFileTypeIcon,
+    getAllFilesFromAllLevels,
 
     // Folder functions
     toggleFolderExpansion,
