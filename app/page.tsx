@@ -114,7 +114,7 @@ export default function Home() {
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections/${selectedProvider}`,
+        path: `/connections?connection_provider=gdrive&limit=10`,
         status: connections && connections.length > 0 ? 200 : 404,
         response: connections && connections.length > 0 
           ? `Found ${connections.length} connection(s) for ${getProviderInfo(selectedProvider).name}` 
@@ -128,7 +128,7 @@ export default function Home() {
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections/${selectedProvider}`,
+        path: `/connections?connection_provider=gdrive&limit=10`,
         status: 500,
         response: `Connection failed for ${getProviderInfo(selectedProvider).name}: ${err instanceof Error ? err.message : "Unknown error"}`,
       };
