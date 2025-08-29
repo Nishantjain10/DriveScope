@@ -513,6 +513,7 @@ export function useFileExplorer() {
   }, [connectionId]);
 
   // Auto-load folder contents when folder is selected
+  // This function is PURE - it only loads contents, doesn't modify selections
   const autoLoadFolderContents = useCallback(async (folderId: string) => {
     if (!connectionId || folderContents[folderId]) return;
     
@@ -527,20 +528,6 @@ export function useFileExplorer() {
         [folderId]: directFiles
       }));
       
-      // Auto-select all sub-files if the parent folder is already selected
-      // This preserves selections during loading
-      if (selectedFiles.has(folderId)) {
-        const newSelectedFiles = new Set(selectedFiles);
-        // Ensure parent folder remains selected
-        newSelectedFiles.add(folderId);
-        // Add all sub-files
-        directFiles.forEach(subFile => {
-          newSelectedFiles.add(subFile.resource_id);
-        });
-        setSelectedFiles(newSelectedFiles);
-        console.log('🔄 Auto-selected', directFiles.length, 'sub-files for auto-loaded folder:', folderId);
-      }
-      
       console.log('🔄 Auto-loaded', directFiles.length, 'direct files from folder:', folderId);
     } catch (error) {
       console.error('Failed to auto-load folder contents:', error);
@@ -551,7 +538,7 @@ export function useFileExplorer() {
         return newSet;
       });
     }
-  }, [connectionId, folderContents, getDirectFolderContents, selectedFiles]);
+  }, [connectionId, folderContents, getDirectFolderContents]);
 
   const toggleFolderExpansion = async (folderId: string) => {
     if (expandedFolders.has(folderId)) {
@@ -578,6 +565,7 @@ export function useFileExplorer() {
           }));
           
           // Auto-select all sub-files if the parent folder is already selected
+          // This only happens when folder is expanded, not during background loading
           if (selectedFiles.has(folderId)) {
             const newSelectedFiles = new Set(selectedFiles);
             // Ensure parent folder remains selected
@@ -653,11 +641,6 @@ export function useFileExplorer() {
       return newSet;
     });
     
-    // Force a re-render to update header checkbox state
-    // This ensures the indeterminate state is properly calculated
-    setTimeout(() => {
-      setSelectedFiles(current => new Set(current));
-    }, 0);
   }, [folderContents, loadingFolders, autoLoadFolderContents]);
 
   // Enhanced select all to include nested folder contents
