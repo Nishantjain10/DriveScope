@@ -328,7 +328,7 @@ export default function FilesPage() {
                                         e.stopPropagation();
                                         toggleFolderExpansion(file.resource_id);
                                       }}
-                                      className="folder-toggle-btn ml-2 p-1 hover:bg-zinc-100 rounded transition-colors"
+                                      className="folder-toggle-btn hover:bg-zinc-100 rounded transition-colors"
                                     >
                                       {expandedFolders.has(file.resource_id) ? (
                                         <ChevronDown className="w-4 h-4 text-zinc-500" />
