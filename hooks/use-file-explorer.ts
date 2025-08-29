@@ -673,15 +673,19 @@ export function useFileExplorer() {
     }
 
     const subFiles = folderContents[folderId] || [];
-    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
+    // Don't include the folder itself in selection logic
+    const childFileIds = subFiles.map(f => f.resource_id);
 
     setSelectedFiles(prev => {
       const next = new Set(prev);
-      const isCurrentlySelected = allFolderFileIds.every(id => next.has(id));
-      if (isCurrentlySelected) {
-        allFolderFileIds.forEach(id => next.delete(id));
+      const areAllChildrenSelected = childFileIds.every(id => next.has(id));
+      
+      if (areAllChildrenSelected) {
+        // Deselect all children
+        childFileIds.forEach(id => next.delete(id));
       } else {
-        allFolderFileIds.forEach(id => next.add(id));
+        // Select all children
+        childFileIds.forEach(id => next.add(id));
       }
       return next;
     });
@@ -784,9 +788,12 @@ export function useFileExplorer() {
 
   const isFolderPartiallySelected = useCallback((folderId: string) => {
     const subFiles = folderContents[folderId] || [];
-    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
-    const selectedCount = allFolderFileIds.filter(id => selectedFiles.has(id)).length;
-    return selectedCount > 0 && selectedCount < allFolderFileIds.length;
+    if (subFiles.length === 0) {
+      return false;
+    }
+    // Check if some but not all children are selected
+    const selectedChildrenCount = subFiles.filter(subFile => selectedFiles.has(subFile.resource_id)).length;
+    return selectedChildrenCount > 0 && selectedChildrenCount < subFiles.length;
   }, [folderContents, selectedFiles]);
 
   const getTotalSelectedCount = useCallback(() => {
