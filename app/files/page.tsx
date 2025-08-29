@@ -64,7 +64,6 @@ export default function FilesPage() {
     // Navigation functions
     navigateToFolder,
     navigateBack,
-    getCurrentPath,
     
     // Selection functions
     toggleFileSelection,
@@ -72,7 +71,6 @@ export default function FilesPage() {
     selectAllFiles,
     deselectAllFiles,
     isAllSelected,
-    isIndeterminate,
     isIndeterminateEnhanced,
     isFolderFullySelected,
     isFolderPartiallySelected,
