@@ -37,7 +37,7 @@ export interface FileSearchFilters {
     sortBy: 'name' | 'date';
     sortOrder: 'asc' | 'desc';
     fileType: 'all' | 'files' | 'folders';
-    indexStatus: 'all' | 'indexed' | 'pending' | 'deindexed';
+    indexStatus: 'all' | 'indexed' | 'pending' | 'error' | 'deindexed' | 'not-indexed' | 'no-status';
 }
 
 interface FileSearchBarProps {
@@ -56,7 +56,10 @@ const statusOptions = [
     { value: 'all' as const, label: 'All Status', variant: 'outline' as const },
     { value: 'indexed' as const, label: 'Indexed', variant: 'outline' as const },
     { value: 'pending' as const, label: 'Pending', variant: 'outline' as const },
+    { value: 'error' as const, label: 'Error', variant: 'outline' as const },
     { value: 'deindexed' as const, label: 'De-Indexed', variant: 'outline' as const },
+    { value: 'not-indexed' as const, label: 'Not Indexed', variant: 'outline' as const },
+    { value: 'no-status' as const, label: 'No Status', variant: 'outline' as const },
 ];
 
 export function FileSearchBar({ 

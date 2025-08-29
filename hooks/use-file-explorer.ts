@@ -916,7 +916,10 @@ export function useFileExplorer() {
 
       if (searchFilters.indexStatus !== 'all') {
         const fileStatus = getDisplayStatus(file);
-        if (searchFilters.indexStatus !== fileStatus) return false;
+        // Strict filtering: only show files with exactly the specified status
+        if (searchFilters.indexStatus !== fileStatus) {
+          return false;
+        }
       }
 
       return true;
