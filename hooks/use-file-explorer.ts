@@ -336,27 +336,12 @@ export function useFileExplorer() {
     return 'Unknown';
   };
 
-  // Get effective status prioritizing local state over backend response
-  const getEffectiveStatus = (file: FileResource) => {
-    // Always check local state first (most up-to-date)
-    if (fileStatuses[file.resource_id]) {
-      return fileStatuses[file.resource_id];
-    }
-    // Fall back to backend status only if no local state
-    // Don't show "not-indexed" by default - use "no-status" for cleaner UI
-    return file.status || 'no-status';
-  };
-
   const getDisplayStatus = (file: FileResource) => {
-    const effectiveStatus = getEffectiveStatus(file);
-    
-    // For cleaner UI, don't show "not-indexed" by default
-    // Only show meaningful statuses that users care about
-    if (effectiveStatus === 'not-indexed') {
-      return 'no-status';
+    if (file.inode_type === 'directory') {
+      return fileStatuses[file.resource_id] || file.status || 'no-status';
     }
-    
-    return effectiveStatus;
+    const status = fileStatuses[file.resource_id] || file.status || 'not-indexed';
+    return status;
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -898,26 +883,14 @@ export function useFileExplorer() {
 
   const isCountingInProgress = useCallback(() => loadingFolders.size > 0, [loadingFolders]);
 
-  // Get all files from all levels (root + nested folders)
-  const getAllFilesFromAllLevels = useCallback(() => {
-    const allFiles = [...files];
-    
-    // Add files from all nested folders
-    Object.values(folderContents).forEach(subFiles => {
-      subFiles.forEach(subFile => {
-        // Only add if not already in the main files array
-        if (!files.some(file => file.resource_id === subFile.resource_id)) {
-          allFiles.push(subFile);
-        }
-      });
-    });
-    
-    return allFiles;
-  }, [files, folderContents]);
-
-  // Filter and sort all files from all levels
-  const filteredAndSortedFiles = getAllFilesFromAllLevels()
+  // Filter and sort
+  const filteredAndSortedFiles = files
     .filter(file => {
+      const isInSubfolder = Object.values(folderContents).some(subFiles =>
+        subFiles.some(subFile => subFile.resource_id === file.resource_id)
+      );
+      if (isInSubfolder) return false;
+
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
         const fileName = getFileName(file).toLowerCase();
@@ -930,11 +903,8 @@ export function useFileExplorer() {
       }
 
       if (searchFilters.indexStatus !== 'all') {
-        const status = getEffectiveStatus(file);
-        // Strict filtering: only show files with exactly the specified status
-        if (status !== searchFilters.indexStatus) {
-          return false;
-        }
+        const fileStatus = getDisplayStatus(file);
+        if (searchFilters.indexStatus !== fileStatus) return false;
       }
 
       return true;
@@ -990,10 +960,8 @@ export function useFileExplorer() {
     getFileName,
     getFileSize,
     getDisplayStatus,
-    getEffectiveStatus,
     getStatusBadgeVariant,
     getFileTypeIcon,
-    getAllFilesFromAllLevels,
 
     // Folder functions
     toggleFolderExpansion,
