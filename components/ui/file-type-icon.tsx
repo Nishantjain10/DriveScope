@@ -19,7 +19,7 @@ interface FileTypeIconProps {
 
 export function FileTypeIcon({ file, className = "w-5 h-5" }: FileTypeIconProps) {
   if (file.inode_type === 'directory') {
-    return <FolderIcon className={`${className} text-blue-500`} />;
+    return <FolderIcon className={`${className} text-[#18181B]`} />;
   }
 
   // Get file extension
