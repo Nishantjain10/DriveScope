@@ -1,6 +1,7 @@
 "use client";
 
 import "../app.css";
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileSearchBar } from '@/components/ui/file-search-bar';
@@ -13,7 +14,9 @@ import {
   ArrowLeft,
   Grid3X3,
   List,
-  Upload
+  Upload,
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,6 +26,7 @@ export default function FilesPage() {
     viewMode,
     selectedFiles,
     filteredAndSortedFiles,
+    expandedFolders,
     
     // Loading states
     connectionsLoading,
@@ -44,6 +48,9 @@ export default function FilesPage() {
     getFileSize,
     getDisplayStatus,
     getStatusBadgeVariant,
+    
+    // Folder functions
+    toggleFolderExpansion,
     
     // Selection functions
     toggleFileSelection,
@@ -206,7 +213,7 @@ export default function FilesPage() {
                               if (input) input.indeterminate = isIndeterminate;
                             }}
                             onChange={() => isAllSelected ? deselectAllFiles() : selectAllFiles()}
-                            className="header-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            className="header-checkbox"
                           />
                         </TableHead>
                         <TableHead className="name-column text-[#5F6368] font-medium">Name</TableHead>
@@ -220,56 +227,137 @@ export default function FilesPage() {
                     </TableHeader>
                     <TableBody>
                       {filteredAndSortedFiles.map((file) => (
-                        <TableRow 
-                          key={file.resource_id} 
-                          className="file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer"
-                        >
-                          <TableCell className="selection-cell">
-                            <input
-                              type="checkbox"
-                              checked={selectedFiles.has(file.resource_id)}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                toggleFileSelection(file.resource_id);
-                              }}
-                              className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                          </TableCell>
-                          <TableCell className="name-cell">
-                            <div className="file-info flex items-center gap-3">
-                              <span className="file-icon">
-                                <FileTypeIcon file={file} />
-                              </span>
-                              <div className="file-details">
-                                <p className="file-name text-[#202124] text-sm">
-                                  {getFileName(file)}
-                                </p>
+                        <React.Fragment key={file.resource_id}>
+                          {/* Main File/Folder Row */}
+                          <TableRow 
+                            className="file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer"
+                          >
+                            <TableCell className="selection-cell">
+                              <input
+                                type="checkbox"
+                                checked={selectedFiles.has(file.resource_id)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  toggleFileSelection(file.resource_id);
+                                }}
+                                className="file-checkbox"
+                              />
+                            </TableCell>
+                            <TableCell className="name-cell">
+                              <div className="file-info flex items-center gap-3">
+                                <span className="file-icon">
+                                  <FileTypeIcon file={file} />
+                                </span>
+                                <div className="file-details flex items-center gap-2">
+                                  <p className="file-name text-[#202124] text-sm">
+                                    {getFileName(file)}
+                                  </p>
+                                  {/* Folder Expansion Toggle */}
+                                  {file.inode_type === 'directory' && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleFolderExpansion(file.resource_id);
+                                      }}
+                                      className="folder-toggle-btn ml-2 p-1 hover:bg-zinc-100 rounded transition-colors"
+                                    >
+                                      {expandedFolders.has(file.resource_id) ? (
+                                        <ChevronDown className="w-4 h-4 text-zinc-500" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 text-zinc-500" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="owner-cell text-[#5F6368] text-sm">
-                            me
-                          </TableCell>
-                          <TableCell className="modified-cell text-[#5F6368] text-sm">
-                            {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="size-cell text-[#5F6368] text-sm">
-                            {getFileSize(file)}
-                          </TableCell>
-                          <TableCell className="actions-cell text-right">
-                            <FileActions
-                              file={file}
-                              status={getDisplayStatus(file)}
-                              statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
-                              onIndex={handleIndex}
-                              onDeindex={handleDeindex}
-                              onRemove={handleRemove}
-                              isIndexing={indexMutation.isPending}
-                              isDeindexing={deindexMutation.isPending}
-                              isRemoving={removeFromListingMutation.isPending}
-                            />
-                          </TableCell>
-                        </TableRow>
+                            </TableCell>
+                            <TableCell className="owner-cell text-[#5F6368] text-sm">
+                              me
+                            </TableCell>
+                            <TableCell className="modified-cell text-[#5F6368] text-sm">
+                              {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="size-cell text-[#5F6368] text-sm">
+                              {getFileSize(file)}
+                            </TableCell>
+                            <TableCell className="actions-cell text-right">
+                              <FileActions
+                                file={file}
+                                status={getDisplayStatus(file)}
+                                statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
+                                onIndex={handleIndex}
+                                onDeindex={handleDeindex}
+                                onRemove={handleRemove}
+                                isIndexing={indexMutation.isPending}
+                                isDeindexing={deindexMutation.isPending}
+                                isRemoving={removeFromListingMutation.isPending}
+                              />
+                            </TableCell>
+                          </TableRow>
+                          
+                          {/* Sub-files within expanded folders */}
+                          {file.inode_type === 'directory' && expandedFolders.has(file.resource_id) && (
+                            <>
+                              {filteredAndSortedFiles
+                                .filter(subFile => 
+                                  subFile.inode_type === 'file' && 
+                                  subFile.inode_path?.path?.startsWith((file.inode_path?.path || file.inode_path?.name || '') + '/')
+                                )
+                                .map((subFile) => (
+                                  <TableRow 
+                                    key={`${file.resource_id}-${subFile.resource_id}`}
+                                    className="sub-file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer bg-[#FAFAFB]"
+                                  >
+                                    <TableCell className="selection-cell pl-8">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedFiles.has(subFile.resource_id)}
+                                        onChange={(e) => {
+                                          e.stopPropagation();
+                                          toggleFileSelection(subFile.resource_id);
+                                        }}
+                                        className="file-checkbox"
+                                      />
+                                    </TableCell>
+                                    <TableCell className="name-cell">
+                                      <div className="file-info flex items-center gap-3">
+                                        <span className="file-icon">
+                                          <FileTypeIcon file={subFile} />
+                                        </span>
+                                        <div className="file-details">
+                                          <p className="file-name text-[#202124] text-sm text-zinc-600">
+                                            {getFileName(subFile)}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="owner-cell text-[#5F6368] text-sm">
+                                      me
+                                    </TableCell>
+                                    <TableCell className="modified-cell text-[#5F6368] text-sm">
+                                      {new Date(subFile.updated_at || subFile.created_at || Date.now()).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell className="size-cell text-[#5F6368] text-sm">
+                                      {getFileSize(subFile)}
+                                    </TableCell>
+                                    <TableCell className="actions-cell text-right">
+                                      <FileActions
+                                        file={subFile}
+                                        status={getDisplayStatus(subFile)}
+                                        statusVariant={getStatusBadgeVariant(getDisplayStatus(subFile))}
+                                        onIndex={handleIndex}
+                                        onDeindex={handleDeindex}
+                                        onRemove={handleRemove}
+                                        isIndexing={indexMutation.isPending}
+                                        isDeindexing={deindexMutation.isPending}
+                                        isRemoving={removeFromListingMutation.isPending}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </>
+                          )}
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>
@@ -290,7 +378,7 @@ export default function FilesPage() {
                             e.stopPropagation();
                             toggleFileSelection(file.resource_id);
                           }}
-                          className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="file-checkbox"
                         />
                       </div>
                       
