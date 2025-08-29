@@ -364,11 +364,11 @@ export default function TestPage() {
                 <div className="env-check bg-[#F8F9FA] p-3 rounded-md text-sm border border-[#EDEDF0]">
                   <p className="font-medium mb-2 text-[#202124]">Environment Check:</p>
                   <ul className="space-y-1 text-xs text-[#5F6368]">
-                    <li>API URL: {process.env.NEXT_PUBLIC_STACK_AI_API_URL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_API_URL || 'Not set'}</li>
-                    <li>Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL || 'Not set'}</li>
-                    <li>Anon Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'} {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set'}</li>
-                    <li>Test Email: {process.env.NEXT_PUBLIC_STACK_AI_EMAIL ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_EMAIL || 'Not set'}</li>
-                    <li>Test Password: {process.env.NEXT_PUBLIC_STACK_AI_PASSWORD ? '✅' : '❌'} {process.env.NEXT_PUBLIC_STACK_AI_PASSWORD ? 'Set' : 'Not set'}</li>
+                    <li>API URL: {process.env.STACK_AI_API_URL ? '✅' : '❌'} {process.env.STACK_AI_API_URL || 'Not set'}</li>
+                                <li>Supabase URL: {process.env.SUPABASE_AUTH_URL ? '✅' : '❌'} {process.env.SUPABASE_AUTH_URL || 'Not set'}</li>
+            <li>Anon Key: {process.env.SUPABASE_ANON_KEY ? '✅' : '❌'} {process.env.SUPABASE_ANON_KEY ? 'Set' : 'Not set'}</li>
+                                <li>Test Email: {process.env.STACK_AI_EMAIL ? '✅' : '❌'} {process.env.STACK_AI_EMAIL || 'Not set'}</li>
+            <li>Test Password: {process.env.STACK_AI_PASSWORD ? '✅' : '❌'} {process.env.STACK_AI_PASSWORD ? 'Set' : 'Not set'}</li>
                   </ul>
                 </div>
               </div>

@@ -10,9 +10,9 @@ import {
 } from '@/lib/types/api';
 
 class StackAIClient {
-  private baseUrl = process.env.NEXT_PUBLIC_STACK_AI_API_URL;
-  private supabaseAuthUrl = process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL;
-  private anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  private baseUrl = process.env.STACK_AI_API_URL;
+  private supabaseAuthUrl = process.env.SUPABASE_AUTH_URL;
+  private anonKey = process.env.SUPABASE_ANON_KEY;
   
   private authHeaders: AuthHeaders | null = null;
   private orgId: string | null = null;
@@ -24,7 +24,7 @@ class StackAIClient {
   async authenticate(credentials: AuthCredentials): Promise<AuthHeaders> {
     if (!this.baseUrl || !this.supabaseAuthUrl || !this.anonKey) {
       throw new ApiError(
-        'API configuration missing. Please set NEXT_PUBLIC_STACK_AI_API_URL, NEXT_PUBLIC_SUPABASE_AUTH_URL, and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',
+        'API configuration missing. Please set STACK_AI_API_URL, SUPABASE_AUTH_URL, and SUPABASE_ANON_KEY environment variables.',
         500
       );
     }
@@ -192,12 +192,12 @@ class StackAIClient {
   async authenticateWithTestCredentials(): Promise<AuthHeaders> {
     // These credentials are provided in the task specification for testing
     // Task file states: Email: stackaitest@gmail.com, Password: !z4ZnxkyLYs#vR
-    const testEmail = process.env.NEXT_PUBLIC_STACK_AI_EMAIL;
-    const testPassword = process.env.NEXT_PUBLIC_STACK_AI_PASSWORD;
+    const testEmail = process.env.STACK_AI_EMAIL;
+    const testPassword = process.env.STACK_AI_PASSWORD;
     
     if (!testEmail || !testPassword) {
       throw new ApiError(
-        'Test credentials not configured. Please set NEXT_PUBLIC_STACK_AI_EMAIL and NEXT_PUBLIC_STACK_AI_PASSWORD environment variables.',
+        'Test credentials not configured. Please set STACK_AI_EMAIL and STACK_AI_PASSWORD environment variables.',
         401
       );
     }
