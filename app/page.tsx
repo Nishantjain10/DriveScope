@@ -38,7 +38,7 @@ export default function Home() {
     isLoading: connectionsLoading, 
     error: connectionsError,
     refetch: refetchConnections 
-  } = useConnections();
+  } = useConnections(selectedProvider);
 
   const updateHeight = useCallback(() => {
     if (detailsRef.current) {
@@ -80,24 +80,28 @@ export default function Home() {
           name: 'Google Drive',
           logoSrc: '/drive.svg',
           isSupported: true,
+          apiProvider: 'gdrive',
         };
       case 'onedrive':
         return {
           name: 'OneDrive',
           logoSrc: '/ms-onedrive.svg',
           isSupported: false,
+          apiProvider: 'onedrive',
         };
       case 'dropbox':
         return {
           name: 'Dropbox',
           logoSrc: '/dropbox-icon.svg',
           isSupported: false,
+          apiProvider: 'dropbox',
         };
       default:
         return {
           name: 'Google Drive',
           logoSrc: '/drive.svg',
           isSupported: true,
+          apiProvider: 'gdrive',
         };
     }
   };
@@ -114,7 +118,7 @@ export default function Home() {
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections?connection_provider=gdrive&limit=10`,
+        path: `/connections?connection_provider=${getProviderInfo(selectedProvider).apiProvider || 'gdrive'}&limit=10`,
         status: connections && connections.length > 0 ? 200 : 404,
         response: connections && connections.length > 0 
           ? `Found ${connections.length} connection(s) for ${getProviderInfo(selectedProvider).name}` 
@@ -128,7 +132,7 @@ export default function Home() {
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections?connection_provider=gdrive&limit=10`,
+        path: `/connections?connection_provider=${getProviderInfo(selectedProvider).apiProvider || 'gdrive'}&limit=10`,
         status: 500,
         response: `Connection failed for ${getProviderInfo(selectedProvider).name}: ${err instanceof Error ? err.message : "Unknown error"}`,
       };

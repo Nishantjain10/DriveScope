@@ -16,12 +16,30 @@ import {
 
 
 /**
- * Get Google Drive connections for the authenticated user
+ * Get connections for the specified provider
  */
-export async function getConnections(): Promise<Connection[]> {
-  const response = await stackAIClient.request<Connection[]>(
-    '/connections?connection_provider=gdrive&limit=10'
-  );
+export async function getConnections(provider?: string): Promise<Connection[]> {
+  let endpoint = '/connections?limit=10';
+  
+  if (provider) {
+    switch (provider) {
+      case 'google-drive':
+        endpoint += '&connection_provider=gdrive';
+        break;
+      case 'onedrive':
+        endpoint += '&connection_provider=onedrive';
+        break;
+      case 'dropbox':
+        endpoint += '&connection_provider=dropbox';
+        break;
+      default:
+        endpoint += '&connection_provider=gdrive'; // fallback to Google Drive
+    }
+  } else {
+    endpoint += '&connection_provider=gdrive'; // default to Google Drive
+  }
+  
+  const response = await stackAIClient.request<Connection[]>(endpoint);
   return response;
 }
 

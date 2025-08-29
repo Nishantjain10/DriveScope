@@ -62,13 +62,13 @@ export function useAuthentication() {
 }
 
 /**
- * Get Google Drive connections (requires authentication)
+ * Get connections for the specified provider (requires authentication)
  */
-export function useConnections() {
+export function useConnections(provider?: string) {
   return useQuery({
-    queryKey: fileQueryKeys.connections(),
+    queryKey: [...fileQueryKeys.connections(), provider],
     queryFn: async () => {
-      console.log('📂 Fetching connections...');
+      console.log(`📂 Fetching ${provider || 'Google Drive'} connections...`);
       
       // Check if already authenticated
       if (!stackAIClient.isAuthenticated()) {
@@ -76,7 +76,7 @@ export function useConnections() {
         await stackAIClient.authenticateWithTestCredentials();
       }
       
-      return getConnections();
+      return getConnections(provider);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
