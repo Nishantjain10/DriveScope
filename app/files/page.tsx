@@ -68,6 +68,8 @@ export default function FilesPage() {
     isFolderFullySelected,
     isFolderPartiallySelected,
     getTotalSelectedCount,
+    getVisibleSelectedCount,
+    isCountingInProgress,
     
     // Actions
     setViewMode,
@@ -598,6 +600,8 @@ export default function FilesPage() {
       <DynamicFooter
         selectedCount={selectedFiles.size}
         totalSelectedCount={getTotalSelectedCount()}
+        visibleSelectedCount={getVisibleSelectedCount()}
+        isCountingInProgress={isCountingInProgress()}
         onCancel={() => setSelectedFiles(new Set())}
         onLoadSelected={handleBulkIndex}
         onRemoveSelected={handleBulkRemove}

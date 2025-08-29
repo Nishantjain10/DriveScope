@@ -628,8 +628,16 @@ export function useFileExplorer() {
   const selectAllFiles = useCallback(() => {
     const allFileIds = new Set<string>();
     
-    // Add root files
-    files.forEach(file => allFileIds.add(file.resource_id));
+    // Add root files (excluding those already in subfolders)
+    files.forEach(file => {
+      const isInSubfolder = Object.values(folderContents).some(subFiles => 
+        subFiles.some(subFile => subFile.resource_id === file.resource_id)
+      );
+      
+      if (!isInSubfolder) {
+        allFileIds.add(file.resource_id);
+      }
+    });
     
     // Add all sub-files from expanded folders and their nested contents
     Object.values(folderContents).forEach(subFiles => {
@@ -664,10 +672,17 @@ export function useFileExplorer() {
   const getTotalSelectedCount = useCallback(() => {
     let total = 0;
     
-    // Count root files
+    // Count root files (excluding those that are already in subfolders)
     files.forEach(file => {
       if (selectedFiles.has(file.resource_id)) {
-        total++;
+        // Check if this file is not already counted in a subfolder
+        const isInSubfolder = Object.values(folderContents).some(subFiles => 
+          subFiles.some(subFile => subFile.resource_id === file.resource_id)
+        );
+        
+        if (!isInSubfolder) {
+          total++;
+        }
       }
     });
     
@@ -682,6 +697,36 @@ export function useFileExplorer() {
     
     return total;
   }, [files, folderContents, selectedFiles]);
+
+  // Get visible count (files that are actually visible in the UI)
+  const getVisibleSelectedCount = useCallback(() => {
+    let visibleCount = 0;
+    
+    // Count root files that are visible
+    files.forEach(file => {
+      if (selectedFiles.has(file.resource_id)) {
+        visibleCount++;
+      }
+    });
+    
+    // Count sub-files that are visible (from expanded folders)
+    Object.entries(folderContents).forEach(([folderId, subFiles]) => {
+      if (expandedFolders.has(folderId)) {
+        subFiles.forEach(subFile => {
+          if (selectedFiles.has(subFile.resource_id)) {
+            visibleCount++;
+          }
+        });
+      }
+    });
+    
+    return visibleCount;
+  }, [files, folderContents, expandedFolders, selectedFiles]);
+
+  // Check if we're still loading folder contents for counting
+  const isCountingInProgress = useCallback(() => {
+    return loadingFolders.size > 0;
+  }, [loadingFolders]);
 
   // Filter and sort files
   const filteredAndSortedFiles = files
@@ -780,6 +825,8 @@ export function useFileExplorer() {
     isFolderFullySelected,
     isFolderPartiallySelected,
     getTotalSelectedCount,
+    getVisibleSelectedCount,
+    isCountingInProgress,
     
     // Actions
     setViewMode,

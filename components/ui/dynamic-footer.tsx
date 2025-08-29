@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface DynamicFooterProps {
   selectedCount: number;
   totalSelectedCount: number;
+  visibleSelectedCount: number;
+  isCountingInProgress: boolean;
   onCancel: () => void;
   onLoadSelected: () => void;
   onRemoveSelected?: () => void;
@@ -13,6 +16,8 @@ interface DynamicFooterProps {
 export function DynamicFooter({
   selectedCount,
   totalSelectedCount,
+  visibleSelectedCount,
+  isCountingInProgress,
   onCancel,
   onLoadSelected,
   onRemoveSelected,
@@ -22,7 +27,7 @@ export function DynamicFooter({
   // Only show footer when items are selected
   if (selectedCount === 0) return null;
   
-  const showNestedCount = totalSelectedCount > selectedCount;
+  const showNestedCount = totalSelectedCount > visibleSelectedCount;
   
   return (
     <>
@@ -30,18 +35,25 @@ export function DynamicFooter({
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
-                {showNestedCount ? (
-                  <>
-                    <span className="font-medium">{selectedCount}</span> visible,{' '}
-                    <span className="font-medium">{totalSelectedCount}</span> total selected
-                  </>
-                ) : (
-                  <>
-                    <span className="font-medium">{selectedCount}</span> selected
-                  </>
-                )}
-              </span>
+              {isCountingInProgress ? (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Counting folder contents...</span>
+                </div>
+              ) : (
+                <span className="text-sm text-gray-600">
+                  {showNestedCount ? (
+                    <>
+                      <span className="font-medium">{visibleSelectedCount}</span> visible,{' '}
+                      <span className="font-medium">{totalSelectedCount}</span> total selected
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">{visibleSelectedCount}</span> selected
+                    </>
+                  )}
+                </span>
+              )}
             </div>
           </div>
           
