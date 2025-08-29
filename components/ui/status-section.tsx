@@ -57,7 +57,7 @@ export function StatusSection({
 
   return (
     <section className="mt-8 lg:mt-12 flex h-44 lg:h-52 flex-col items-center px-4">
-      {providerStatuses[selectedProvider] === "loading" || connectionsLoading ? (
+      {(providerStatuses[selectedProvider] === "loading" || connectionsLoading) && selectedProvider === 'google-drive' ? (
         <div className="flex flex-row gap-4">
           <div role="status">
             <svg
