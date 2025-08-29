@@ -76,6 +76,7 @@ export function FileSearchBar({
 
     const debouncedQuery = useDebounce(query, 300);
     const onFiltersChangeRef = useRef(onFiltersChange);
+    const prevQueryRef = useRef(query);
 
     // Update ref when callback changes
     useEffect(() => {
@@ -84,12 +85,13 @@ export function FileSearchBar({
 
     // Handle debounced query changes
     useEffect(() => {
-        if (debouncedQuery !== filters.query) {
+        if (debouncedQuery !== prevQueryRef.current) {
             const updatedFilters = { ...filters, query: debouncedQuery };
             setFilters(updatedFilters);
             onFiltersChangeRef.current(updatedFilters);
+            prevQueryRef.current = debouncedQuery;
         }
-    }, [debouncedQuery]);
+    }, [debouncedQuery, filters]);
 
     const handleFilterChange = (key: keyof FileSearchFilters, value: string) => {
         const updatedFilters = { ...filters, [key]: value };

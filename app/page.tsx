@@ -36,7 +36,6 @@ export default function Home() {
   const { 
     data: connections, 
     isLoading: connectionsLoading, 
-    error: connectionsError,
     refetch: refetchConnections 
   } = useConnections(selectedProvider);
 
@@ -44,7 +43,7 @@ export default function Home() {
     if (detailsRef.current) {
       setDetailHeight(detailsRef.current.clientHeight);
     }
-  }, [logs, showLogs]);
+  }, []);
 
   useEffect(() => {
     updateHeight();
@@ -53,14 +52,17 @@ export default function Home() {
   }, [updateHeight]);
 
   useEffect(() => {
-    if (!detailsRef.current) return;
-    detailsRef.current.addEventListener("toggle", updateHeight);
+    const currentDetails = detailsRef.current;
+    if (!currentDetails) return;
+    
+    currentDetails.addEventListener("toggle", updateHeight);
 
     return () => {
-      if (!detailsRef.current) return;
-      detailsRef.current.removeEventListener("toggle", updateHeight);
+      if (currentDetails) {
+        currentDetails.removeEventListener("toggle", updateHeight);
+      }
     };
-  }, []);
+  }, [updateHeight]);
 
   const handleProviderSelect = (provider: Provider) => {
     setSelectedProvider(provider);
