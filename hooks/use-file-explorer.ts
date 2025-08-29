@@ -886,7 +886,7 @@ export function useFileExplorer() {
   // Get files to filter based on current context (root files or current folder contents)
   const getFilesToFilter = useCallback(() => {
     // If we're in a specific folder (grid view navigation), use current folder contents
-    if (currentFolderId && currentFolderContents.length > 0) {
+    if (currentFolderId) {
       return currentFolderContents;
     }
     
