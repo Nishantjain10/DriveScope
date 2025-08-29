@@ -96,7 +96,9 @@
 .header-checkbox:indeterminate {
   border-color: var(--cb-bg-checked);
   background-color: var(--cb-bg-checked);
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M12 4v16M4 12h16'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M10 4v12M4 10h12'/%3e%3c/svg%3e");
+  background-size: 60% 60%;
+  background-position: center;
 }
 
 .header-checkbox:indeterminate:hover {

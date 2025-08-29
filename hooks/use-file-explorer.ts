@@ -477,7 +477,18 @@ export function useFileExplorer() {
   const [loadingFolders, setLoadingFolders] = useState<Set<string>>(new Set());
   const [nestedFolderContents, setNestedFolderContents] = useState<Record<string, FileResource[]>>({});
 
-  // Recursive function to get all files in a folder tree
+  // Get direct folder contents (not recursive) to prevent duplicates
+  const getDirectFolderContents = useCallback(async (folderId: string): Promise<FileResource[]> => {
+    try {
+      const response = await listFiles(connectionId!, { resource_id: folderId });
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch folder contents:', error);
+      return [];
+    }
+  }, [connectionId]);
+
+  // Recursive function to get all files in a folder tree (for counting only)
   const getAllFilesInFolderTree = useCallback(async (folderId: string, depth: number = 0): Promise<FileResource[]> => {
     if (depth > 5) return []; // Prevent infinite recursion
     
@@ -508,14 +519,15 @@ export function useFileExplorer() {
     setLoadingFolders(prev => new Set([...prev, folderId]));
     
     try {
-      const allFiles = await getAllFilesInFolderTree(folderId);
+      // Use direct contents for display, not recursive
+      const directFiles = await getDirectFolderContents(folderId);
       
       setFolderContents(prev => ({
         ...prev,
-        [folderId]: allFiles
+        [folderId]: directFiles
       }));
       
-      console.log('🔄 Auto-loaded', allFiles.length, 'files from folder tree:', folderId);
+      console.log('🔄 Auto-loaded', directFiles.length, 'direct files from folder:', folderId);
     } catch (error) {
       console.error('Failed to auto-load folder contents:', error);
     } finally {
@@ -525,7 +537,7 @@ export function useFileExplorer() {
         return newSet;
       });
     }
-  }, [connectionId, folderContents, getAllFilesInFolderTree]);
+  }, [connectionId, folderContents, getDirectFolderContents]);
 
   const toggleFolderExpansion = async (folderId: string) => {
     if (expandedFolders.has(folderId)) {
@@ -543,21 +555,22 @@ export function useFileExplorer() {
         setLoadingFolders(prev => new Set([...prev, folderId]));
         
         try {
-          const allFiles = await getAllFilesInFolderTree(folderId);
+          // Use direct contents for display, not recursive
+          const directFiles = await getDirectFolderContents(folderId);
           
           setFolderContents(prev => ({
             ...prev,
-            [folderId]: allFiles
+            [folderId]: directFiles
           }));
           
           // Auto-select all sub-files if the parent folder is already selected
           if (selectedFiles.has(folderId)) {
             const newSelectedFiles = new Set(selectedFiles);
-            allFiles.forEach(subFile => {
+            directFiles.forEach(subFile => {
               newSelectedFiles.add(subFile.resource_id);
             });
             setSelectedFiles(newSelectedFiles);
-            console.log('🔄 Auto-selected', allFiles.length, 'sub-files for expanded folder:', folderId);
+            console.log('🔄 Auto-selected', directFiles.length, 'sub-files for expanded folder:', folderId);
           }
         } catch (error) {
           console.error('Failed to fetch folder contents:', error);
@@ -651,8 +664,31 @@ export function useFileExplorer() {
     setSelectedFiles(new Set());
   };
 
-  const isAllSelected = selectedFiles.size === files.length && files.length > 0;
-  const isIndeterminate = selectedFiles.size > 0 && selectedFiles.size < files.length;
+  // Calculate total visible files (root files + visible subfolder files)
+  const getTotalVisibleFiles = useCallback(() => {
+    let total = files.length;
+    
+    // Add visible subfolder files
+    Object.entries(folderContents).forEach(([folderId, subFiles]) => {
+      if (expandedFolders.has(folderId)) {
+        total += subFiles.length;
+      }
+    });
+    
+    return total;
+  }, [files, folderContents, expandedFolders]);
+
+  // Check if all visible files are selected
+  const isAllSelected = useCallback(() => {
+    const totalVisible = getTotalVisibleFiles();
+    return selectedFiles.size === totalVisible && totalVisible > 0;
+  }, [selectedFiles.size, getTotalVisibleFiles]);
+
+  // Check if some files are selected (indeterminate state)
+  const isIndeterminate = useCallback(() => {
+    const totalVisible = getTotalVisibleFiles();
+    return selectedFiles.size > 0 && selectedFiles.size < totalVisible;
+  }, [selectedFiles.size, getTotalVisibleFiles]);
 
   // Enhanced folder selection state checking
   const isFolderFullySelected = useCallback((folderId: string) => {

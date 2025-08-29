@@ -269,15 +269,15 @@ export default function FilesPage() {
                     <TableHeader>
                       <TableRow className="table-header-row border-b border-[#EDEDF0] bg-[#F8F9FA]">
                         <TableHead className="selection-column text-[#5F6368] font-medium w-12">
-                          <input
-                            type="checkbox"
-                            checked={isAllSelected}
-                            ref={(input) => {
-                              if (input) input.indeterminate = isIndeterminate;
-                            }}
-                            onChange={() => isAllSelected ? deselectAllFiles() : selectAllFiles()}
-                            className="header-checkbox"
-                          />
+                                                      <input
+                              type="checkbox"
+                              checked={isAllSelected()}
+                              ref={(input) => {
+                                if (input) input.indeterminate = isIndeterminate();
+                              }}
+                              onChange={() => isAllSelected() ? deselectAllFiles() : selectAllFiles()}
+                              className="header-checkbox"
+                            />
                         </TableHead>
                         <TableHead className="name-column text-[#5F6368] font-medium">Name</TableHead>
                         <TableHead className="owner-column text-[#5F6368] font-medium">Owner</TableHead>
