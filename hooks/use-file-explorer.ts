@@ -336,12 +336,27 @@ export function useFileExplorer() {
     return 'Unknown';
   };
 
-  const getDisplayStatus = (file: FileResource) => {
-    if (file.inode_type === 'directory') {
-      return fileStatuses[file.resource_id] || file.status || 'no-status';
+  // Get effective status prioritizing local state over backend response
+  const getEffectiveStatus = (file: FileResource) => {
+    // Always check local state first (most up-to-date)
+    if (fileStatuses[file.resource_id]) {
+      return fileStatuses[file.resource_id];
     }
-    const status = fileStatuses[file.resource_id] || file.status || 'not-indexed';
-    return status;
+    // Fall back to backend status only if no local state
+    // Don't show "not-indexed" by default - use "no-status" for cleaner UI
+    return file.status || 'no-status';
+  };
+
+  const getDisplayStatus = (file: FileResource) => {
+    const effectiveStatus = getEffectiveStatus(file);
+    
+    // For cleaner UI, don't show "not-indexed" by default
+    // Only show meaningful statuses that users care about
+    if (effectiveStatus === 'not-indexed') {
+      return 'no-status';
+    }
+    
+    return effectiveStatus;
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -915,9 +930,9 @@ export function useFileExplorer() {
       }
 
       if (searchFilters.indexStatus !== 'all') {
-        const fileStatus = getDisplayStatus(file);
+        const status = getEffectiveStatus(file);
         // Strict filtering: only show files with exactly the specified status
-        if (searchFilters.indexStatus !== fileStatus) {
+        if (status !== searchFilters.indexStatus) {
           return false;
         }
       }
@@ -975,6 +990,7 @@ export function useFileExplorer() {
     getFileName,
     getFileSize,
     getDisplayStatus,
+    getEffectiveStatus,
     getStatusBadgeVariant,
     getFileTypeIcon,
     getAllFilesFromAllLevels,
