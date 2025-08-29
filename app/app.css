@@ -162,6 +162,19 @@ summary::-webkit-details-marker {
   display: none;
 }
 
+/* Loading bar animation */
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 /* animations */
 .connection-pulse {
   animation: pulse-glow 2s ease-in-out infinite;
@@ -179,4 +192,59 @@ summary::-webkit-details-marker {
 @keyframes line-draw {
   0% { transform: scaleX(0); }
   100% { transform: scaleX(1); }
+}
+
+/* Filter button styling - minimal and elegant */
+.filter-panel .sort-options button,
+.filter-panel .file-type-options button {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 500;
+}
+
+.filter-panel .sort-options button:hover,
+.filter-panel .file-type-options button:hover {
+  background: #e2e8f0;
+  color: #334155;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Active state for selected filter buttons - targeting shadcn Button variants */
+.filter-panel .sort-options .bg-primary,
+.filter-panel .file-type-options .bg-primary,
+.filter-panel .sort-options button[data-variant="default"],
+.filter-panel .file-type-options button[data-variant="default"] {
+  background: #1e293b !important;
+  color: white !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.3) !important;
+}
+
+.filter-panel .sort-options .bg-primary:hover,
+.filter-panel .file-type-options .bg-primary:hover,
+.filter-panel .sort-options button[data-variant="default"]:hover,
+.filter-panel .file-type-options button[data-variant="default"]:hover {
+  background: #334155 !important;
+  border-color: #334155 !important;
+  transform: translateY(-1px);
+}
+
+/* Override shadcn default button styling for filter buttons */
+.filter-panel .sort-options button,
+.filter-panel .file-type-options button {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Ensure the default variant gets our custom styling */
+.sort-name-btn.bg-primary,
+.sort-date-btn.bg-primary,
+.file-type-all-btn.bg-primary,
+.file-type-files-btn.bg-primary,
+.file-type-folders-btn.bg-primary {
+  background: #1e293b !important;
+  color: white !important;
+  border-color: #1e293b !important;
 }
