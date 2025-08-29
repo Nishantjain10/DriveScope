@@ -40,4 +40,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-stack-ai-home-task/
+stack-ai-home-task

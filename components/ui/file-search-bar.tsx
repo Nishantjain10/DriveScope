@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,8 +54,8 @@ const filterOptions = [
 
 const statusOptions = [
     { value: 'all' as const, label: 'All Status', variant: 'outline' as const },
-    { value: 'indexed' as const, label: 'Indexed', variant: 'default' as const },
-    { value: 'pending' as const, label: 'Pending', variant: 'secondary' as const },
+    { value: 'indexed' as const, label: 'Indexed', variant: 'outline' as const },
+    { value: 'pending' as const, label: 'Pending', variant: 'outline' as const },
     { value: 'deindexed' as const, label: 'De-Indexed', variant: 'outline' as const },
 ];
 
@@ -75,14 +75,23 @@ export function FileSearchBar({
     });
 
     const debouncedQuery = useDebounce(query, 300);
+    const onFiltersChangeRef = useRef(onFiltersChange);
 
+    // Update ref when callback changes
     useEffect(() => {
-        const updatedFilters = { ...filters, query: debouncedQuery };
-        setFilters(updatedFilters);
-        onFiltersChange(updatedFilters);
+        onFiltersChangeRef.current = onFiltersChange;
+    }, [onFiltersChange]);
+
+    // Handle debounced query changes
+    useEffect(() => {
+        if (debouncedQuery !== filters.query) {
+            const updatedFilters = { ...filters, query: debouncedQuery };
+            setFilters(updatedFilters);
+            onFiltersChangeRef.current(updatedFilters);
+        }
     }, [debouncedQuery]);
 
-    const handleFilterChange = (key: keyof FileSearchFilters, value: any) => {
+    const handleFilterChange = (key: keyof FileSearchFilters, value: string) => {
         const updatedFilters = { ...filters, [key]: value };
         setFilters(updatedFilters);
         onFiltersChange(updatedFilters);
@@ -252,7 +261,7 @@ export function FileSearchBar({
                     <span>Active filters:</span>
                     {query && (
                         <Badge variant="secondary" className="filter-query-badge">
-                            Search: "{query}"
+                            Search: &quot;{query}&quot;
                         </Badge>
                     )}
                     {filters.fileType !== 'all' && (

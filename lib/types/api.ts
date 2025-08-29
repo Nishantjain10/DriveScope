@@ -38,7 +38,7 @@ export interface PaginatedResponse<T> {
 export interface ApiError {
   message: string;
   status: number;
-  details?: any;
+  details?: unknown;
 }
 
 // Connection types
