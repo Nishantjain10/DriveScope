@@ -317,8 +317,11 @@ export function useFileExplorer() {
         }
       }, 2000);
       
-      const fileText = selectedFileIds.length === 1 ? 'file' : 'files';
-      toast.success(`Bulk indexing process started for ${selectedFileIds.length} ${fileText}! This may take several minutes.`);
+      if (selectedFileIds.length === 1) {
+        toast.success('Indexing process started for 1 file! This may take several minutes.');
+      } else {
+        toast.success(`Bulk indexing process started for ${selectedFileIds.length} files! This may take several minutes.`);
+      }
       setSelectedFiles(new Set());
     } catch (error) {
       toast.error('Failed to start bulk indexing process. Please try again.');
