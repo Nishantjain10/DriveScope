@@ -382,8 +382,8 @@ export default function FilesPage() {
                               
                               {/* Actual sub-files */}
                               {!isFolderLoading(file.resource_id) && getFilesInFolder(file.resource_id).map((subFile) => (
+                                <React.Fragment key={`${file.resource_id}-${subFile.resource_id}`}>
                                   <TableRow 
-                                    key={`${file.resource_id}-${subFile.resource_id}`}
                                     className="sub-file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer bg-[#FAFAFB]"
                                   >
                                     <TableCell className="selection-cell pl-8">
@@ -392,7 +392,11 @@ export default function FilesPage() {
                                         checked={selectedFiles.has(subFile.resource_id)}
                                         onChange={(e) => {
                                           e.stopPropagation();
-                                          toggleFileSelection(subFile.resource_id);
+                                          if (subFile.inode_type === 'directory') {
+                                            toggleFolderSelection(subFile.resource_id);
+                                          } else {
+                                            toggleFileSelection(subFile.resource_id);
+                                          }
                                         }}
                                         className="file-checkbox"
                                       />
@@ -407,6 +411,21 @@ export default function FilesPage() {
                                             {getFileName(subFile)}
                                           </p>
                                         </div>
+                                        {subFile.inode_type === 'directory' && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFolderExpansion(subFile.resource_id);
+                                            }}
+                                            className="expand-button p-1 hover:bg-gray-100 rounded transition-colors"
+                                          >
+                                            {expandedFolders.has(subFile.resource_id) ? (
+                                              <ChevronDown className="w-4 h-4 text-gray-500" />
+                                            ) : (
+                                              <ChevronRight className="w-4 h-4 text-gray-500" />
+                                            )}
+                                          </button>
+                                        )}
                                       </div>
                                     </TableCell>
                                     <TableCell className="owner-cell text-[#5F6368] text-sm">
@@ -432,7 +451,83 @@ export default function FilesPage() {
                                       />
                                     </TableCell>
                                   </TableRow>
-                                ))}
+                                  
+                                  {/* Nested sub-subfolders */}
+                                  {subFile.inode_type === 'directory' && expandedFolders.has(subFile.resource_id) && (
+                                    <>
+                                      {/* Loading state for nested folder */}
+                                      {isFolderLoading(subFile.resource_id) && (
+                                        <TableRow className="sub-sub-file-row border-b border-[#EDEDF0] bg-[#F5F5F5]">
+                                          <TableCell colSpan={6} className="text-center py-4 pl-12">
+                                            <div className="flex items-center justify-center gap-2 text-[#5F6368]">
+                                              <RefreshCw className="w-4 h-4 animate-spin" />
+                                              Loading nested folder contents...
+                                            </div>
+                                          </TableCell>
+                                        </TableRow>
+                                      )}
+                                      
+                                      {/* Nested sub-files */}
+                                      {!isFolderLoading(subFile.resource_id) && getFilesInFolder(subFile.resource_id).map((nestedFile) => (
+                                        <TableRow 
+                                          key={`${subFile.resource_id}-${nestedFile.resource_id}`}
+                                          className="sub-sub-file-row hover:bg-[#F0F0F0] border-b border-[#EDEDF0] cursor-pointer bg-[#F5F5F5]"
+                                        >
+                                          <TableCell className="selection-cell pl-12">
+                                            <input
+                                              type="checkbox"
+                                              checked={selectedFiles.has(nestedFile.resource_id)}
+                                              onChange={(e) => {
+                                                e.stopPropagation();
+                                                if (nestedFile.inode_type === 'directory') {
+                                                  toggleFolderSelection(nestedFile.resource_id);
+                                                } else {
+                                                  toggleFileSelection(nestedFile.resource_id);
+                                                }
+                                              }}
+                                              className="file-checkbox"
+                                            />
+                                          </TableCell>
+                                          <TableCell className="name-cell">
+                                            <div className="file-info flex items-center gap-3">
+                                              <span className="file-icon">
+                                                <FileTypeIcon file={nestedFile} />
+                                              </span>
+                                              <div className="file-details">
+                                                <p className="file-name text-[#202124] text-sm text-zinc-600">
+                                                  {getFileName(nestedFile)}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </TableCell>
+                                          <TableCell className="owner-cell text-[#5F6368] text-sm">
+                                            me
+                                          </TableCell>
+                                          <TableCell className="modified-cell text-[#5F6368] text-sm">
+                                            {new Date(nestedFile.updated_at || nestedFile.created_at || Date.now()).toLocaleDateString()}
+                                          </TableCell>
+                                          <TableCell className="size-cell text-[#5F6368] text-sm">
+                                            {getFileSize(nestedFile)}
+                                          </TableCell>
+                                          <TableCell className="actions-cell text-right">
+                                            <FileActions
+                                              file={nestedFile}
+                                              status={getDisplayStatus(nestedFile)}
+                                              statusVariant={getStatusBadgeVariant(getDisplayStatus(nestedFile))}
+                                              onIndex={handleIndex}
+                                              onDeindex={handleDeindex}
+                                              onRemove={handleRemove}
+                                              isIndexing={indexMutation.isPending}
+                                              isDeindexing={deindexMutation.isPending}
+                                              isRemoving={removeFromListingMutation.isPending}
+                                            />
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </>
+                                  )}
+                                </React.Fragment>
+                              ))}
                             </>
                           )}
                         </React.Fragment>

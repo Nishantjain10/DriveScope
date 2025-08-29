@@ -598,11 +598,11 @@ export function useFileExplorer() {
     });
   };
 
-  // Enhanced folder selection with auto-loading
-  const toggleFolderSelection = useCallback(async (folderId: string) => {
-    // Auto-load folder contents if not already loaded
+  // Enhanced folder selection with auto-loading - made synchronous to prevent lag
+  const toggleFolderSelection = useCallback((folderId: string) => {
+    // Start auto-loading in background if not already loaded
     if (!folderContents[folderId]) {
-      await autoLoadFolderContents(folderId);
+      autoLoadFolderContents(folderId);
     }
     
     const subFiles = folderContents[folderId] || [];
@@ -625,7 +625,7 @@ export function useFileExplorer() {
   }, [folderContents, autoLoadFolderContents]);
 
   // Enhanced select all to include nested folder contents
-  const selectAllFiles = useCallback(async () => {
+  const selectAllFiles = useCallback(() => {
     const allFileIds = new Set<string>();
     
     // Add root files
