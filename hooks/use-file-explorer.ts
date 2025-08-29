@@ -731,6 +731,15 @@ export function useFileExplorer() {
   // Filter and sort files
   const filteredAndSortedFiles = files
     .filter(file => {
+      // Exclude files that are already present in subfolders to prevent duplicates
+      const isInSubfolder = Object.values(folderContents).some(subFiles => 
+        subFiles.some(subFile => subFile.resource_id === file.resource_id)
+      );
+      
+      if (isInSubfolder) {
+        return false; // Don't show files that are already in subfolders
+      }
+      
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
         const fileName = getFileName(file).toLowerCase();

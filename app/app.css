@@ -68,24 +68,35 @@
 }
 
 /* checked */
-.file-checkbox:checked,
-.header-checkbox:checked {
+.file-checkbox:checked {
   border-color: var(--cb-bg-checked);
   background-color: var(--cb-bg-checked);
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='4 11 8 15 16 6'/%3e%3c/svg%3e");
 }
 
-.file-checkbox:checked:hover,
+.file-checkbox:checked:hover {
+  background-color: var(--cb-bg-checked-hover);
+  border-color: var(--cb-bg-checked-hover);
+}
+
+/* header checkbox states - different logic */
+.header-checkbox:checked {
+  /* When all files are selected, show minus icon to deselect all */
+  border-color: var(--cb-bg-checked);
+  background-color: var(--cb-bg-checked);
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M4 12h12'/%3e%3c/svg%3e");
+}
+
 .header-checkbox:checked:hover {
   background-color: var(--cb-bg-checked-hover);
   border-color: var(--cb-bg-checked-hover);
 }
 
-/* indeterminate state for header checkbox only */
+/* indeterminate state for header checkbox - show plus icon to select all */
 .header-checkbox:indeterminate {
   border-color: var(--cb-bg-checked);
   background-color: var(--cb-bg-checked);
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M4 12h12'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M12 4v16M4 12h16'/%3e%3c/svg%3e");
 }
 
 .header-checkbox:indeterminate:hover {
