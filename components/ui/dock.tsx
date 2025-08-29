@@ -25,8 +25,6 @@ export type DockItemData = {
   label: ReactNode;
   onClick: () => void;
   className?: string; 
-  isActive?: boolean;
-  isDisabled?: boolean;
 };
 
 export type DockProps = {
@@ -49,8 +47,6 @@ type DockItemProps = {
   distance: number;
   baseItemSize: number;
   magnification: number;
-  isActive?: boolean;
-  isDisabled?: boolean;
 };
 
 const DockItem: FC<DockItemProps> = ({
@@ -62,8 +58,6 @@ const DockItem: FC<DockItemProps> = ({
   distance,
   magnification,
   baseItemSize,
-  isActive = false,
-  isDisabled = false,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isHovered = useMotionValue(0);
@@ -85,24 +79,17 @@ const DockItem: FC<DockItemProps> = ({
     <motion.div
       ref={ref}
       style={{ width: size, height: size }}
-      onHoverStart={() => !isDisabled && isHovered.set(1)}
+      onHoverStart={() => isHovered.set(1)}
       onHoverEnd={() => isHovered.set(0)}
-      onFocus={() => !isDisabled && isHovered.set(1)} 
+      onFocus={() => isHovered.set(1)} 
       onBlur={() => isHovered.set(0)}  
-      onClick={!isDisabled ? onClick : undefined}
-      className={`relative inline-flex items-center justify-center rounded-full 
-                  transition-all duration-300 shadow-lg
-                  ${isDisabled 
-                    ? 'bg-neutral-200 dark:bg-neutral-800 opacity-50 cursor-not-allowed' 
-                    : isActive 
-                      ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-600 border-2' 
-                      : 'bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 border-2 hover:bg-neutral-50 dark:hover:bg-neutral-800'
-                  }
-                  ${!isDisabled ? 'cursor-pointer' : ''}
+      onClick={onClick}
+      className={`relative inline-flex items-center justify-center rounded-[25%] 
+                  bg-white border border-[#FAFAFB] shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)]
+                  transition-colors duration-300 cursor-pointer
                   ${className}`} 
-      tabIndex={isDisabled ? -1 : 0}
+      tabIndex={0}
       role="button"
-      aria-disabled={isDisabled}
     >
       {Children.map(children, (child) =>
         cloneElement(child as React.ReactElement<{ isHovered?: MotionValue<number> }>, { isHovered })
@@ -174,8 +161,8 @@ export const Dock: FC<DockProps> = ({
   panelHeight = 64, 
   baseItemSize = 50,
 }) => {
-  const mouseX = useMotionValue(Infinity); 
-  const isPanelHovered = useMotionValue(0); 
+  const mouseX = useMotionValue(Infinity);
+  const isPanelHovered = useMotionValue(0);
 
   const calculatedMaxHeight = useMemo(
     () => Math.max(panelHeight, magnification + baseItemSize / 4 + 4), 
@@ -195,12 +182,12 @@ export const Dock: FC<DockProps> = ({
         onMouseMove={({ pageX }) => mouseX.set(pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}
         className={`${className} 
-                    flex items-end w-fit gap-4 
-                    rounded-2xl 
-                    border border-neutral-200 dark:border-neutral-700
-                    pb-3 px-4
-                    bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md 
-                    shadow-2xl transition-colors duration-300`}
+                    flex items-end w-fit gap-3 sm:gap-4 
+                    rounded-xl sm:rounded-2xl 
+                    border border-[#19191C0A] border-2 
+                    pb-2 sm:pb-3 px-3 sm:px-4
+                    bg-[#F9F9FA] backdrop-blur-md 
+                    shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)] transition-colors duration-300`}
         style={{ height: panelHeight }} 
         role="toolbar"
         aria-label="Knowledge base provider dock"
@@ -215,8 +202,6 @@ export const Dock: FC<DockProps> = ({
             distance={distance}
             magnification={magnification}
             baseItemSize={baseItemSize}
-            isActive={item.isActive}
-            isDisabled={item.isDisabled}
           >
             <DockIcon>{item.icon}</DockIcon>
             <DockLabel>{item.label}</DockLabel>
