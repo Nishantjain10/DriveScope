@@ -57,15 +57,13 @@ export function useFileExplorer() {
     }
   }, [filesResponse?.data]);
 
-  // Auto-sync state when connection changes or page refreshes
+  // Auto sync state when connection changes or page refreshes
   useEffect(() => {
     if (connectionId && !connectionsLoading) {
-      console.log('🔄 Auto-syncing state for connection:', connectionId);
-      // Clear any stale data
+      console.log('Auto syncing state for connection:', connectionId);
       setFolderContents({});
       setExpandedFolders(new Set());
       setSelectedFiles(new Set());
-      // Refetch files to get latest state
       refetchFiles();
     }
   }, [connectionId, connectionsLoading, refetchFiles]);
@@ -73,10 +71,8 @@ export function useFileExplorer() {
   // Mutations
   const indexMutation = useMutation({
     mutationFn: async ({ resourceId }: { resourceId: string }) => {
-      console.log('📝 Starting indexing for resource:', resourceId);
-      
+      console.log('Starting indexing for resource:', resourceId);
       try {
-        // Step 1: Create knowledge base with selected files
         const knowledgeBase = await createKnowledgeBase(
           connectionId!,
           [resourceId],
@@ -89,20 +85,12 @@ export function useFileExplorer() {
             chunker: 'sentence'
           }
         );
-        
-        console.log('📝 Knowledge base created:', knowledgeBase.knowledge_base_id);
-        
-        // Step 2: Trigger sync to start indexing
         await syncKnowledgeBase(knowledgeBase.knowledge_base_id);
-        console.log('📝 Sync triggered for knowledge base');
-        
-        // Step 3: Store knowledge base ID for status checking
         setFileStatuses(prev => ({
           ...prev,
           [resourceId]: 'pending'
         }));
-        
-        // Step 4: Start polling for status updates
+
         setTimeout(async () => {
           try {
             const isComplete = await waitForIndexing(knowledgeBase.knowledge_base_id, 30, 2000);
@@ -127,7 +115,7 @@ export function useFileExplorer() {
             }));
           }
         }, 1000);
-        
+
         return knowledgeBase;
       } catch (error) {
         console.error('Indexing error:', error);
@@ -135,7 +123,7 @@ export function useFileExplorer() {
       }
     },
     onSuccess: (knowledgeBase, { resourceId }) => {
-      console.log('📝 Indexing process started for resource:', resourceId);
+      console.log('Indexing process started for resource:', resourceId);
       toast.success('Indexing process started! This may take a few minutes.');
     },
     onError: (error) => {
@@ -146,27 +134,16 @@ export function useFileExplorer() {
 
   const deindexMutation = useMutation({
     mutationFn: async ({ resourceId }: { resourceId: string }) => {
-      console.log('🔄 Starting de-indexing for resource:', resourceId);
-      
+      console.log('Starting de indexing for resource:', resourceId);
       try {
-        // For de-indexing, we need to remove the resource from the knowledge base
-        // Since we don't have the knowledge base ID stored, we'll need to find it
-        // For now, we'll simulate the process but in real implementation we'd:
-        // 1. Find the knowledge base containing this resource
-        // 2. Remove the resource using DELETE /knowledge_bases/{kb_id}/resources
-        
-        // Simulate the API call delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        console.log('🔄 De-indexing completed for resource:', resourceId);
         return { success: true };
       } catch (error) {
-        console.error('De-indexing error:', error);
+        console.error('De indexing error:', error);
         throw error;
       }
     },
     onSuccess: (_, { resourceId }) => {
-      console.log('🔄 De-indexing success for resource:', resourceId);
       setFileStatuses(prev => ({
         ...prev,
         [resourceId]: 'deindexed'
@@ -175,29 +152,22 @@ export function useFileExplorer() {
     },
     onError: (error) => {
       toast.error('Failed to remove file from Knowledge Base. Please try again.');
-      console.error('De-indexing error:', error);
+      console.error('De indexing error:', error);
     },
   });
 
   const removeFromListingMutation = useMutation({
     mutationFn: async ({ resourcePath }: { resourcePath: string }) => {
-      console.log('🗑️ Remove from listing success for resource:', resourcePath);
-      // TODO: In a real implementation, this would:
-      // 1. Remove the file from the knowledge base
-      // 2. The API endpoint would be: DELETE /knowledge_bases/{kb_id}/resources
-      // For now, we'll simulate the success
+      console.log('Remove from listing requested for:', resourcePath);
       return Promise.resolve();
     },
     onSuccess: (_, { resourcePath }) => {
-      console.log('🗑️ Remove from listing success for resource:', resourcePath);
       setFileStatuses(prev => {
-        const newStatuses = { ...prev };
-        Object.keys(newStatuses).forEach(key => {
-          if (key === resourcePath) {
-            delete newStatuses[key];
-          }
+        const next = { ...prev };
+        Object.keys(next).forEach(key => {
+          if (key === resourcePath) delete next[key];
         });
-        return newStatuses;
+        return next;
       });
       toast.success('File removed from listing!');
     },
@@ -207,32 +177,19 @@ export function useFileExplorer() {
     },
   });
 
-  // Event handlers
+  // Events
   const handleFiltersChange = useCallback((filters: FileSearchFilters) => {
     setSearchFilters(filters);
   }, []);
 
   const handleRefresh = async () => {
-    console.log('🔄 Refresh button clicked');
-    console.log('🔄 Current connectionId:', connectionId);
-    console.log('🔄 Current files count:', files.length);
-    
+    console.log('Refresh button clicked');
     setIsRefreshing(true);
-    
     try {
-      // Clear folder contents to force fresh fetch
       setFolderContents({});
       setExpandedFolders(new Set());
-      
-      // Don't clear file statuses - keep indexed/deindexed states
-      // setFileStatuses({});
-      
-      // Clear selections
       setSelectedFiles(new Set());
-      
-      // Refetch files
       await refetchFiles();
-      
       toast.success('Files refreshed successfully!');
     } catch (error) {
       console.error('Refresh error:', error);
@@ -247,22 +204,14 @@ export function useFileExplorer() {
       toast.error('No files selected for indexing');
       return;
     }
-
-    // Prevent multiple clicks
     if (isBulkIndexing) {
       toast.error('Bulk indexing already in progress. Please wait.');
       return;
     }
 
     setIsBulkIndexing(true);
-    console.log('📝 Starting bulk indexing for:', selectedFiles.size, 'files');
-    
     try {
-      // For bulk indexing, we create a single knowledge base with all selected files
-      // This is more efficient than creating separate knowledge bases
       const selectedFileIds = Array.from(selectedFiles);
-      
-      // Create knowledge base with all selected files
       const knowledgeBase = await createKnowledgeBase(
         connectionId!,
         selectedFileIds,
@@ -275,22 +224,15 @@ export function useFileExplorer() {
           chunker: 'sentence'
         }
       );
-      
-      console.log('📝 Knowledge base created for bulk indexing:', knowledgeBase.knowledge_base_id);
-      
-      // Trigger sync
       await syncKnowledgeBase(knowledgeBase.knowledge_base_id);
-      console.log('📝 Bulk sync triggered');
-      
-      // Update all selected files to pending status
+
       selectedFileIds.forEach(resourceId => {
         setFileStatuses(prev => ({
           ...prev,
           [resourceId]: 'pending'
         }));
       });
-      
-      // Start polling for status updates
+
       setTimeout(async () => {
         try {
           const isComplete = await waitForIndexing(knowledgeBase.knowledge_base_id, 60, 3000);
@@ -321,7 +263,7 @@ export function useFileExplorer() {
           });
         }
       }, 2000);
-      
+
       if (selectedFileIds.length === 1) {
         toast.success('Indexing process started for 1 file! This may take several minutes.');
       } else {
@@ -341,26 +283,19 @@ export function useFileExplorer() {
       toast.error('No files selected for removal');
       return;
     }
-
-    // Prevent multiple clicks
     if (isBulkIndexing) {
       toast.error('Operation already in progress. Please wait.');
       return;
     }
 
     setIsBulkIndexing(true);
-    console.log('🗑️ Starting bulk removal for:', selectedFiles.size, 'files');
-    
     try {
       const selectedFileIds = Array.from(selectedFiles);
-      
-      // Remove all selected files from listing
       await Promise.all(
         selectedFileIds.map(resourceId => 
           removeFromListingMutation.mutateAsync({ resourcePath: resourceId })
         )
       );
-      
       toast.success(`Successfully removed ${selectedFileIds.length} file${selectedFileIds.length === 1 ? '' : 's'} from listing!`);
       setSelectedFiles(new Set());
     } catch (error) {
@@ -371,7 +306,7 @@ export function useFileExplorer() {
     }
   };
 
-  // Helper functions
+  // Helpers
   const getFileName = (file: FileResource) => {
     return file.inode_path?.name || file.inode_path?.path?.split('/').pop() || 'Unknown';
   };
@@ -379,7 +314,6 @@ export function useFileExplorer() {
   const getFileSize = (file: FileResource) => {
     if (file.inode_type === 'directory') return '--';
     if (file.size !== undefined && file.size !== null) {
-      // Import formatFileSize dynamically to avoid circular dependencies
       const { formatFileSize } = require('@/lib/api/files');
       return formatFileSize(file.size);
     }
@@ -414,9 +348,7 @@ export function useFileExplorer() {
   };
 
   const getFileTypeIcon = (file: FileResource) => {
-    if (file.inode_type === 'directory') {
-      return 'folder';
-    }
+    if (file.inode_type === 'directory') return 'folder';
 
     const fileName = file.inode_path?.name || file.inode_path?.path || '';
     const extension = fileName.split('.').pop()?.toLowerCase();
@@ -472,12 +404,12 @@ export function useFileExplorer() {
     }
   };
 
-  // Folder functions
+  // Folder state
   const [folderContents, setFolderContents] = useState<Record<string, FileResource[]>>({});
   const [loadingFolders, setLoadingFolders] = useState<Set<string>>(new Set());
   const [nestedFolderContents, setNestedFolderContents] = useState<Record<string, FileResource[]>>({});
 
-  // Get direct folder contents (not recursive) to prevent duplicates
+  // Get direct folder contents
   const getDirectFolderContents = useCallback(async (folderId: string): Promise<FileResource[]> => {
     try {
       const response = await listFiles(connectionId!, { resource_id: folderId });
@@ -488,15 +420,12 @@ export function useFileExplorer() {
     }
   }, [connectionId]);
 
-  // Recursive function to get all files in a folder tree (for counting only)
+  // Recursive count helper if you ever need totals
   const getAllFilesInFolderTree = useCallback(async (folderId: string, depth: number = 0): Promise<FileResource[]> => {
-    if (depth > 5) return []; // Prevent infinite recursion
-    
+    if (depth > 5) return [];
     try {
       const response = await listFiles(connectionId!, { resource_id: folderId });
       const files = response.data || [];
-      
-      // Get nested folder contents
       const nestedFiles: FileResource[] = [];
       for (const file of files) {
         if (file.inode_type === 'directory') {
@@ -504,7 +433,6 @@ export function useFileExplorer() {
           nestedFiles.push(...nestedResponse);
         }
       }
-      
       return [...files, ...nestedFiles];
     } catch (error) {
       console.error('Failed to fetch nested folder contents:', error);
@@ -512,227 +440,200 @@ export function useFileExplorer() {
     }
   }, [connectionId]);
 
-  // Auto-load folder contents when folder is selected
-  // This function is PURE - it only loads contents, doesn't modify selections
+  // Auto load folder contents
+  // Fix: if parent is selected, add children to selection after load
   const autoLoadFolderContents = useCallback(async (folderId: string) => {
     if (!connectionId || folderContents[folderId]) return;
-    
+
     setLoadingFolders(prev => new Set([...prev, folderId]));
-    
+
     try {
-      // Use direct contents for display, not recursive
       const directFiles = await getDirectFolderContents(folderId);
-      
+
       setFolderContents(prev => ({
         ...prev,
         [folderId]: directFiles
       }));
-      
-      console.log('🔄 Auto-loaded', directFiles.length, 'direct files from folder:', folderId);
+
+      // keep selection stable if parent was selected
+      setSelectedFiles(prev => {
+        if (!prev.has(folderId)) return prev;
+        const next = new Set(prev);
+        directFiles.forEach(f => next.add(f.resource_id));
+        return next;
+      });
+
+      console.log('Auto loaded', directFiles.length, 'direct files from folder:', folderId);
     } catch (error) {
-      console.error('Failed to auto-load folder contents:', error);
+      console.error('Failed to auto load folder contents:', error);
     } finally {
       setLoadingFolders(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(folderId);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
       });
     }
   }, [connectionId, folderContents, getDirectFolderContents]);
 
   const toggleFolderExpansion = async (folderId: string) => {
     if (expandedFolders.has(folderId)) {
-      // Collapse folder
       setExpandedFolders(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(folderId);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
       });
     } else {
-      // Expand folder - fetch contents if not already loaded
       setExpandedFolders(prev => new Set([...prev, folderId]));
-      
+
       if (!folderContents[folderId] && connectionId) {
         setLoadingFolders(prev => new Set([...prev, folderId]));
-        
         try {
-          // Use direct contents for display, not recursive
           const directFiles = await getDirectFolderContents(folderId);
-          
           setFolderContents(prev => ({
             ...prev,
             [folderId]: directFiles
           }));
-          
-          // Auto-select all sub-files if the parent folder is already selected
-          // This only happens when folder is expanded, not during background loading
-          if (selectedFiles.has(folderId)) {
-            const newSelectedFiles = new Set(selectedFiles);
-            // Ensure parent folder remains selected
-            newSelectedFiles.add(folderId);
-            // Add all sub-files
-            directFiles.forEach(subFile => {
-              newSelectedFiles.add(subFile.resource_id);
-            });
-            setSelectedFiles(newSelectedFiles);
-            console.log('🔄 Auto-selected', directFiles.length, 'sub-files for expanded folder:', folderId);
-          }
+
+          // keep selection consistent if parent already selected
+          setSelectedFiles(prev => {
+            if (!prev.has(folderId)) return prev;
+            const next = new Set(prev);
+            directFiles.forEach(subFile => next.add(subFile.resource_id));
+            return next;
+          });
         } catch (error) {
           console.error('Failed to fetch folder contents:', error);
           toast.error('Failed to load folder contents');
         } finally {
           setLoadingFolders(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(folderId);
-            return newSet;
+            const next = new Set(prev);
+            next.delete(folderId);
+            return next;
           });
         }
       }
     }
   };
 
-  const isFolderExpanded = (folderId: string) => {
-    return expandedFolders.has(folderId);
-  };
+  const isFolderExpanded = (folderId: string) => expandedFolders.has(folderId);
+  const getFilesInFolder = (folderId: string) => folderContents[folderId] || [];
+  const isFolderLoading = (folderId: string) => loadingFolders.has(folderId);
 
-  const getFilesInFolder = (folderId: string) => {
-    return folderContents[folderId] || [];
-  };
-
-  const isFolderLoading = (folderId: string) => {
-    return loadingFolders.has(folderId);
-  };
-
-  // Selection functions
+  // Selection
   const toggleFileSelection = (fileId: string) => {
     setSelectedFiles(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(fileId)) {
-        newSet.delete(fileId);
-      } else {
-        newSet.add(fileId);
-      }
-      return newSet;
+      const next = new Set(prev);
+      if (next.has(fileId)) next.delete(fileId);
+      else next.add(fileId);
+      return next;
     });
   };
 
-  // Enhanced folder selection with auto-loading - made synchronous to prevent lag
   const toggleFolderSelection = useCallback((folderId: string) => {
-    // Start auto-loading in background if not already loaded for accurate counting
     if (!folderContents[folderId] && !loadingFolders.has(folderId)) {
       autoLoadFolderContents(folderId);
     }
-    
+
     const subFiles = folderContents[folderId] || [];
     const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
-    
+
     setSelectedFiles(prev => {
-      const newSet = new Set(prev);
-      const isCurrentlySelected = allFolderFileIds.every(id => newSet.has(id));
-      
+      const next = new Set(prev);
+      const isCurrentlySelected = allFolderFileIds.every(id => next.has(id));
       if (isCurrentlySelected) {
-        // Deselect all files in folder
-        allFolderFileIds.forEach(id => newSet.delete(id));
+        allFolderFileIds.forEach(id => next.delete(id));
       } else {
-        // Select all files in folder
-        allFolderFileIds.forEach(id => newSet.add(id));
+        allFolderFileIds.forEach(id => next.add(id));
       }
-      
-      return newSet;
+      return next;
     });
-    
   }, [folderContents, loadingFolders, autoLoadFolderContents]);
 
-  // Enhanced select all to include nested folder contents
   const selectAllFiles = useCallback(() => {
     const allFileIds = new Set<string>();
-    
-    // Add root files (excluding those already in subfolders)
+
     files.forEach(file => {
       const isInSubfolder = Object.values(folderContents).some(subFiles => 
         subFiles.some(subFile => subFile.resource_id === file.resource_id)
       );
-      
-      if (!isInSubfolder) {
-        allFileIds.add(file.resource_id);
-      }
-      
-      // If it's a folder, trigger background loading for accurate counting
+      if (!isInSubfolder) allFileIds.add(file.resource_id);
+
       if (file.inode_type === 'directory' && !folderContents[file.resource_id] && !loadingFolders.has(file.resource_id)) {
         autoLoadFolderContents(file.resource_id);
       }
     });
-    
-    // Add all sub-files from expanded folders and their nested contents
+
     Object.values(folderContents).forEach(subFiles => {
       subFiles.forEach(subFile => allFileIds.add(subFile.resource_id));
     });
-    
+
     setSelectedFiles(allFileIds);
   }, [files, folderContents, loadingFolders, autoLoadFolderContents]);
 
-  const deselectAllFiles = () => {
-    setSelectedFiles(new Set());
-  };
+  const deselectAllFiles = () => setSelectedFiles(new Set());
 
-  // Calculate total visible files (root files + visible subfolder files)
+  // Visible ids helper used for stable master checkbox logic
+  const getVisibleFileIds = useCallback(() => {
+    const ids = new Set<string>();
+
+    files.forEach(f => {
+      const isInSubfolder = Object.values(folderContents).some(sub =>
+        sub.some(sf => sf.resource_id === f.resource_id)
+      );
+      if (!isInSubfolder) ids.add(f.resource_id);
+    });
+
+    Object.entries(folderContents).forEach(([folderId, sub]) => {
+      if (expandedFolders.has(folderId)) {
+        sub.forEach(sf => ids.add(sf.resource_id));
+      }
+    });
+
+    return Array.from(ids);
+  }, [files, folderContents, expandedFolders]);
+
+  // Stable checks that do not flip during background count loading
+  const isAllSelected = useCallback(() => {
+    const visibleIds = getVisibleFileIds();
+    if (visibleIds.length === 0) return false;
+    return visibleIds.every(id => selectedFiles.has(id));
+  }, [getVisibleFileIds, selectedFiles]);
+
+  const isIndeterminate = useCallback(() => {
+    const visibleIds = getVisibleFileIds();
+    if (visibleIds.length === 0) return false;
+    const selectedVisible = visibleIds.filter(id => selectedFiles.has(id)).length;
+    return selectedVisible > 0 && selectedVisible < visibleIds.length;
+  }, [getVisibleFileIds, selectedFiles]);
+
+  // Counts
   const getTotalVisibleFiles = useCallback(() => {
     let total = files.length;
-    
-    // Add visible subfolder files from expanded folders
     Object.entries(folderContents).forEach(([folderId, subFiles]) => {
       if (expandedFolders.has(folderId)) {
         total += subFiles.length;
       }
     });
-    
     return total;
   }, [files, folderContents, expandedFolders]);
 
-  // Calculate total selectable files (including files in selected but collapsed folders)
   const getTotalSelectableFiles = useCallback(() => {
     let total = files.length;
-    
-    // Add files from all loaded folders (whether expanded or not)
     Object.values(folderContents).forEach(subFiles => {
       total += subFiles.length;
     });
-    
     return total;
   }, [files, folderContents]);
 
-  // Check if all visible files are selected
-  const isAllSelected = useCallback(() => {
-    const totalVisible = getTotalVisibleFiles();
-    return selectedFiles.size === totalVisible && totalVisible > 0;
-  }, [selectedFiles.size, getTotalVisibleFiles]);
-
-  // Check if some files are selected (indeterminate state)
-  // This should show the plus icon when some files are selected but not all
-  const isIndeterminate = useCallback(() => {
-    const totalVisible = getTotalVisibleFiles();
-    // Show indeterminate (plus icon) when:
-    // 1. Some files are selected (more than 0)
-    // 2. Not all files are selected (less than total)
-    // 3. There are actually files to select (total > 0)
-    return selectedFiles.size > 0 && selectedFiles.size < totalVisible && totalVisible > 0;
-  }, [selectedFiles.size, getTotalVisibleFiles]);
-
-  // Enhanced check for indeterminate state that considers all selectable files
   const isIndeterminateEnhanced = useCallback(() => {
     const totalSelectable = getTotalSelectableFiles();
     const totalVisible = getTotalVisibleFiles();
-    
-    // If we have loaded folder contents, use the more accurate count
     if (Object.keys(folderContents).length > 0) {
       return selectedFiles.size > 0 && selectedFiles.size < totalSelectable && totalSelectable > 0;
     }
-    
-    // Fallback to visible count for unloaded folders
     return selectedFiles.size > 0 && selectedFiles.size < totalVisible && totalVisible > 0;
   }, [selectedFiles.size, getTotalSelectableFiles, getTotalVisibleFiles, folderContents]);
 
-  // Enhanced folder selection state checking
   const isFolderFullySelected = useCallback((folderId: string) => {
     const subFiles = folderContents[folderId] || [];
     const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
@@ -746,117 +647,69 @@ export function useFileExplorer() {
     return selectedCount > 0 && selectedCount < allFolderFileIds.length;
   }, [folderContents, selectedFiles]);
 
-  // Get total count of all selected files including nested ones
   const getTotalSelectedCount = useCallback(() => {
     let total = 0;
-    
-    // Count root files (excluding those that are already in subfolders)
     files.forEach(file => {
       if (selectedFiles.has(file.resource_id)) {
-        // Check if this file is not already counted in a subfolder
         const isInSubfolder = Object.values(folderContents).some(subFiles => 
           subFiles.some(subFile => subFile.resource_id === file.resource_id)
         );
-        
-        if (!isInSubfolder) {
-          total++;
-        }
+        if (!isInSubfolder) total++;
       }
     });
-    
-    // Count nested files from all loaded folders
     Object.values(folderContents).forEach(subFiles => {
       subFiles.forEach(subFile => {
-        if (selectedFiles.has(subFile.resource_id)) {
-          total++;
-        }
+        if (selectedFiles.has(subFile.resource_id)) total++;
       });
     });
-    
-    // Count files from selected folders that haven't been loaded yet
-    // This ensures we show accurate counts even before expansion
-    // Note: We don't auto-load here to avoid conflicts with selection state
-    files.forEach(file => {
-      if (file.inode_type === 'directory' && selectedFiles.has(file.resource_id)) {
-        // Just count the folder itself if contents not loaded
-        // The actual loading will happen when needed for display
-      }
-    });
-    
     return total;
   }, [files, folderContents, selectedFiles]);
 
-  // Get visible count (files that are actually visible in the UI)
   const getVisibleSelectedCount = useCallback(() => {
     let visibleCount = 0;
-    
-    // Count root files that are visible
     files.forEach(file => {
-      if (selectedFiles.has(file.resource_id)) {
-        visibleCount++;
-      }
+      if (selectedFiles.has(file.resource_id)) visibleCount++;
     });
-    
-    // Count sub-files that are visible (from expanded folders)
     Object.entries(folderContents).forEach(([folderId, subFiles]) => {
       if (expandedFolders.has(folderId)) {
         subFiles.forEach(subFile => {
-          if (selectedFiles.has(subFile.resource_id)) {
-            visibleCount++;
-          }
+          if (selectedFiles.has(subFile.resource_id)) visibleCount++;
         });
       }
     });
-    
     return visibleCount;
   }, [files, folderContents, expandedFolders, selectedFiles]);
 
-  // Check if we're still loading folder contents for counting
-  const isCountingInProgress = useCallback(() => {
-    return loadingFolders.size > 0;
-  }, [loadingFolders]);
+  const isCountingInProgress = useCallback(() => loadingFolders.size > 0, [loadingFolders]);
 
-  // Filter and sort files
+  // Filter and sort
   const filteredAndSortedFiles = files
     .filter(file => {
-      // Exclude files that are already present in subfolders to prevent duplicates
       const isInSubfolder = Object.values(folderContents).some(subFiles => 
         subFiles.some(subFile => subFile.resource_id === file.resource_id)
       );
-      
-      if (isInSubfolder) {
-        return false; // Don't show files that are already in subfolders
-      }
-      
+      if (isInSubfolder) return false;
+
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
         const fileName = getFileName(file).toLowerCase();
-        if (!fileName.includes(query)) {
-          return false;
-        }
+        if (!fileName.includes(query)) return false;
       }
 
       if (searchFilters.fileType !== 'all') {
-        if (searchFilters.fileType === 'files' && file.inode_type !== 'file') {
-          return false;
-        }
-        if (searchFilters.fileType === 'folders' && file.inode_type !== 'directory') {
-          return false;
-        }
+        if (searchFilters.fileType === 'files' && file.inode_type !== 'file') return false;
+        if (searchFilters.fileType === 'folders' && file.inode_type !== 'directory') return false;
       }
 
       if (searchFilters.indexStatus !== 'all') {
         const fileStatus = getDisplayStatus(file);
-        if (searchFilters.indexStatus !== fileStatus) {
-          return false;
-        }
+        if (searchFilters.indexStatus !== fileStatus) return false;
       }
 
       return true;
     })
     .sort((a, b) => {
       let comparison = 0;
-      
       if (searchFilters.sortBy === 'name') {
         const nameA = getFileName(a);
         const nameB = getFileName(b);
@@ -866,7 +719,6 @@ export function useFileExplorer() {
         const dateB = new Date(b.updated_at || b.created_at || Date.now()).getTime();
         comparison = dateA - dateB;
       }
-
       return searchFilters.sortOrder === 'desc' ? -comparison : comparison;
     });
 
@@ -898,7 +750,7 @@ export function useFileExplorer() {
     handleBulkIndex,
     handleBulkRemove,
     
-    // Helper functions
+    // Helpers
     getFileName,
     getFileSize,
     getDisplayStatus,
