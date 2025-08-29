@@ -493,10 +493,22 @@ export function useFileExplorer() {
         
         try {
           const response = await listFiles(connectionId, { resource_id: folderId });
+          const subFiles = response.data || [];
+          
           setFolderContents(prev => ({
             ...prev,
-            [folderId]: response.data || []
+            [folderId]: subFiles
           }));
+          
+          // Auto-select all sub-files if the parent folder is already selected
+          if (selectedFiles.has(folderId)) {
+            const newSelectedFiles = new Set(selectedFiles);
+            subFiles.forEach(subFile => {
+              newSelectedFiles.add(subFile.resource_id);
+            });
+            setSelectedFiles(newSelectedFiles);
+            console.log('🔄 Auto-selected', subFiles.length, 'sub-files for expanded folder:', folderId);
+          }
         } catch (error) {
           console.error('Failed to fetch folder contents:', error);
           toast.error('Failed to load folder contents');
