@@ -3,6 +3,8 @@
 import "./app.css";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useConnections } from "@/hooks/use-files";
+import { ProviderDock, Provider } from "@/components/ui/provider-dock";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -17,8 +19,17 @@ interface LogEntry {
 export default function Home() {
   const [detailHeight, setDetailHeight] = useState(55);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [status, setStatus] = useState("idle");
   const [showLogs, setShowLogs] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<Provider>('google-drive');
+  
+  // Separate connection states for each provider
+  const [providerStatuses, setProviderStatuses] = useState<Record<Provider, "idle" | "loading" | "success" | "error">>({
+    'google-drive': 'idle',
+    'onedrive': 'idle',
+    'dropbox': 'idle'
+  });
+
+  const router = useRouter();
 
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -51,33 +62,78 @@ export default function Home() {
     };
   }, []);
 
+  const handleProviderSelect = (provider: Provider) => {
+    setSelectedProvider(provider);
+    // Reset the status when switching providers to show fresh state
+    setProviderStatuses(prev => ({ ...prev, [provider]: 'idle' }));
+  };
+
+  const handleNavigateToFiles = () => {
+    router.push('/files');
+  };
+
+  // Get provider display info
+  const getProviderInfo = (provider: Provider) => {
+    switch (provider) {
+      case 'google-drive':
+        return {
+          name: 'Google Drive',
+          logoSrc: '/drive.svg',
+          isSupported: true,
+        };
+      case 'onedrive':
+        return {
+          name: 'OneDrive',
+          logoSrc: '/ms-onedrive.svg',
+          isSupported: false,
+        };
+      case 'dropbox':
+        return {
+          name: 'Dropbox',
+          logoSrc: '/dropbox-icon.svg',
+          isSupported: false,
+        };
+      default:
+        return {
+          name: 'Google Drive',
+          logoSrc: '/drive.svg',
+          isSupported: true,
+        };
+    }
+  };
+
   async function sendPing() {
-    if (status === "loading") return;
-    setStatus("loading");
+    const currentStatus = providerStatuses[selectedProvider];
+    if (currentStatus === "loading") return;
+    
+    setProviderStatuses(prev => ({ ...prev, [selectedProvider]: "loading" }));
+    
     try {
       // Trigger connection check
       await refetchConnections();
       const log = {
         date: new Date(),
         method: "GET",
-        path: "/connections",
+        path: `/connections/${selectedProvider}`,
         status: connections && connections.length > 0 ? 200 : 404,
         response: connections && connections.length > 0 
-          ? `Found ${connections.length} connection(s)` 
-          : "No connections found",
+          ? `Found ${connections.length} connection(s) for ${getProviderInfo(selectedProvider).name}` 
+          : `No connections found for ${getProviderInfo(selectedProvider).name}`,
       };
       setLogs((prevLogs) => [log, ...prevLogs]);
-      setStatus(connections && connections.length > 0 ? "success" : "error");
+      
+      const newStatus = connections && connections.length > 0 ? "success" : "error";
+      setProviderStatuses(prev => ({ ...prev, [selectedProvider]: newStatus }));
     } catch (err) {
       const log = {
         date: new Date(),
         method: "GET",
-        path: "/connections",
+        path: `/connections/${selectedProvider}`,
         status: 500,
-        response: err instanceof Error ? err.message : "Connection failed",
+        response: `Connection failed for ${getProviderInfo(selectedProvider).name}: ${err instanceof Error ? err.message : "Unknown error"}`,
       };
       setLogs((prevLogs) => [log, ...prevLogs]);
-      setStatus("error");
+      setProviderStatuses(prev => ({ ...prev, [selectedProvider]: "error" }));
     }
     setShowLogs(true);
   }
@@ -89,7 +145,7 @@ export default function Home() {
       className="checker-background flex flex-col items-center p-5 relative"
       style={{ marginBottom: `${detailHeight}px` }}
     >
-      <div className="mt-25 flex w-full max-w-[40em] items-center justify-center lg:mt-34">
+      <div className="mt-16 lg:mt-25 flex w-full max-w-[40em] items-center justify-center px-4">
         {/* Stack AI Logo */}
         <div className="rounded-[25%] border border-[#19191C0A] bg-[#F9F9FA] p-3 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
           <div className="rounded-[25%] border border-[#FAFAFB] bg-white p-5 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] lg:p-9">
@@ -105,7 +161,7 @@ export default function Home() {
         {/* Connection Line with Animation */}
         <div
           className={`flex w-38 items-center transition-opacity duration-2500 ${
-            status === "success" ? "opacity-100" : "opacity-0"
+            providerStatuses[selectedProvider] === "success" ? "opacity-100" : "opacity-0"
           }`}
         >
           <div className="h-[1px] flex-1 bg-gradient-to-l from-zinc-400 to-zinc-400/15 connection-line-animate origin-left"></div>
@@ -115,12 +171,12 @@ export default function Home() {
           <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-400 to-zinc-400/15 connection-line-animate origin-right"></div>
         </div>
         
-        {/* Google Drive Logo */}
+        {/* Provider Logo */}
         <div className="rounded-[25%] border border-[#19191C0A] bg-[#F9F9FA] p-3 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
           <div className="rounded-[25%] border border-[#FAFAFB] bg-white p-5 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] lg:p-9">
           <Image
-              alt="Google Drive logo"
-              src="/drive.svg"
+              alt={`${getProviderInfo(selectedProvider).name} logo`}
+              src={getProviderInfo(selectedProvider).logoSrc}
               width={56}
               height={56}
             />
@@ -128,8 +184,8 @@ export default function Home() {
         </div>
       </div>
 
-      <section className="mt-12 flex h-52 flex-col items-center">
-        {status === "loading" || connectionsLoading ? (
+      <section className="mt-8 lg:mt-12 flex h-44 lg:h-52 flex-col items-center px-4">
+        {providerStatuses[selectedProvider] === "loading" || connectionsLoading ? (
           <div className="flex flex-row gap-4">
             <div role="status">
               <svg
@@ -150,9 +206,9 @@ export default function Home() {
               </svg>
               <span className="sr-only">Loading...</span>
             </div>
-            <span>Waiting for connection...</span>
+            <span>Waiting for {getProviderInfo(selectedProvider).name} connection...</span>
           </div>
-        ) : status === "success" && isConnected ? (
+        ) : providerStatuses[selectedProvider] === "success" && isConnected ? (
           <h1 className="font-[Poppins] text-2xl font-light text-[#2D2D31]">
             Congratulations!
           </h1>
@@ -163,29 +219,43 @@ export default function Home() {
         )}
 
         <p className="mt-2 mb-8">
-          {status === "success" && isConnected ? (
-            <span>You connected your app successfully.</span>
-          ) : status === "error" || status === "idle" ? (
-            <span>Send a ping to verify the connection</span>
+          {providerStatuses[selectedProvider] === "success" && isConnected ? (
+            <span>You connected your {getProviderInfo(selectedProvider).name} successfully.</span>
+          ) : providerStatuses[selectedProvider] === "error" || providerStatuses[selectedProvider] === "idle" ? (
+            <span>Send a ping to verify the {getProviderInfo(selectedProvider).name} connection</span>
           ) : null}
         </p>
 
-        {status === "success" && isConnected ? (
-          <Link href="/files">
-            <button className="cursor-pointer rounded-md bg-primary px-4 py-2 flex items-center gap-2 hover:bg-primary/90 text-primary-foreground transition-colors">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary-foreground">
+        {providerStatuses[selectedProvider] === "success" && isConnected ? (
+          selectedProvider === 'google-drive' ? (
+            <Link href="/files">
+              <button className="cursor-pointer rounded-md bg-primary px-4 py-2 flex items-center gap-2 hover:bg-primary/90 text-primary-foreground transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-primary-foreground">
+                  <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                  <path d="M12 22V12L2 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                  <path d="M22 7L12 12L2 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-primary-foreground font-medium">Import from {getProviderInfo(selectedProvider).name}</span>
+              </button>
+            </Link>
+          ) : (
+            <button 
+              disabled 
+              className="cursor-not-allowed rounded-md bg-neutral-300 px-4 py-2 flex items-center gap-2 text-neutral-500 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-neutral-500">
                 <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                 <path d="M12 22V12L2 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                 <path d="M22 7L12 12L2 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
               </svg>
-              <span className="text-primary-foreground font-medium">Import from a Connection</span>
+              <span className="font-medium">{getProviderInfo(selectedProvider).name} (Coming Soon)</span>
             </button>
-          </Link>
+          )
         ) : (
           <button
             onClick={sendPing}
             className={`cursor-pointer rounded-md bg-primary px-2.5 py-1.5 hover:bg-primary/90 text-primary-foreground transition-colors ${
-              status === "loading" || connectionsLoading ? "hidden" : "visible"
+              providerStatuses[selectedProvider] === "loading" || connectionsLoading ? "hidden" : "visible"
             }`}
           >
             <span className="text-primary-foreground">Send a ping</span>
@@ -193,46 +263,16 @@ export default function Home() {
         )}
       </section>
 
-      <div className="grid grid-rows-3 gap-7 lg:grid-cols-3 lg:grid-rows-none">
-        <div className="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4 hover:shadow-lg transition-shadow">
-          <h2 className="text-xl font-light text-[#2D2D31]">Google Drive Picker</h2>
-          <p>
-            Access{" "}
-            <code className="rounded-sm bg-[#EDEDF0] p-1">/files</code> to
-            browse and index your Google Drive files.
-          </p>
-        </div>
-        
-        <Link href="/files">
-          <div className="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4 hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex flex-row items-center justify-between">
-              <h2 className="text-xl font-light text-[#2D2D31]">
-                Browse Files
-              </h2>
-              <span className="text-[#D8D8DB]">→</span>
-            </div>
-            <p>
-              Navigate to the file explorer to manage your Google Drive files
-              and their indexing status.
-            </p>
-          </div>
-        </Link>
-
-        <Link href="/test">
-          <div className="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4 hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex flex-row items-center justify-between">
-              <h2 className="text-xl font-light text-[#2D2D31]">
-                Test Components
-              </h2>
-              <span className="text-[#D8D8DB]">→</span>
-            </div>
-            <p>
-              Access the component testing page to verify API integration and
-              UI components.
-            </p>
-          </div>
-        </Link>
+      {/* Provider Dock */}
+      <div className="mt-6 lg:mt-8 mb-8 px-4">
+        <ProviderDock
+          selectedProvider={selectedProvider}
+          onProviderSelect={handleProviderSelect}
+          onNavigateToFiles={handleNavigateToFiles}
+        />
       </div>
+
+
 
       <aside className="fixed bottom-0 flex w-full cursor-pointer border-t border-[#EDEDF0] bg-white">
         <details open={showLogs} ref={detailsRef} className="w-full">
