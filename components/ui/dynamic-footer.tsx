@@ -33,7 +33,9 @@ export function DynamicFooter({
                   <span className="font-medium">{totalSelectedCount}</span> total selected
                 </>
               ) : (
-                <span className="font-medium">{selectedCount}</span> selected
+                <>
+                  <span className="font-medium">{selectedCount}</span> selected
+                </>
               )}
             </span>
           </div>
