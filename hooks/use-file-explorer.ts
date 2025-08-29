@@ -509,6 +509,16 @@ export function useFileExplorer() {
 
   // Navigation functions for grid view
   const navigateToFolder = useCallback(async (folderId: string, folderName: string) => {
+    // Prevent duplicate navigation to the same folder
+    if (currentFolderId === folderId) {
+      return; // Already in this folder, do nothing
+    }
+
+    // Prevent multiple rapid clicks by checking if already loading
+    if (loadingFolders.has(folderId)) {
+      return; // Already loading this folder, do nothing
+    }
+
     setLoadingFolders(prev => new Set([...prev, folderId]));
 
     try {
@@ -530,7 +540,7 @@ export function useFileExplorer() {
         return next;
       });
     }
-  }, [getDirectFolderContents]);
+  }, [getDirectFolderContents, currentFolderId, loadingFolders]);
 
   const navigateBack = useCallback(() => {
     const newStack = navigationStack.slice(0, -1);
