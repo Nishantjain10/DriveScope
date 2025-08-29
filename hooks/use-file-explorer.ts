@@ -883,14 +883,25 @@ export function useFileExplorer() {
 
   const isCountingInProgress = useCallback(() => loadingFolders.size > 0, [loadingFolders]);
 
-  // Filter and sort
-  const filteredAndSortedFiles = files
-    .filter(file => {
+  // Get files to filter based on current context (root files or current folder contents)
+  const getFilesToFilter = useCallback(() => {
+    // If we're in a specific folder (grid view navigation), use current folder contents
+    if (currentFolderId && currentFolderContents.length > 0) {
+      return currentFolderContents;
+    }
+    
+    // Otherwise, use root files and filter out files that are in subfolders
+    return files.filter(file => {
       const isInSubfolder = Object.values(folderContents).some(subFiles =>
         subFiles.some(subFile => subFile.resource_id === file.resource_id)
       );
-      if (isInSubfolder) return false;
+      return !isInSubfolder;
+    });
+  }, [currentFolderId, currentFolderContents, files, folderContents]);
 
+  // Filter and sort
+  const filteredAndSortedFiles = getFilesToFilter()
+    .filter(file => {
       if (searchFilters.query) {
         const query = searchFilters.query.toLowerCase();
         const fileName = getFileName(file).toLowerCase();
