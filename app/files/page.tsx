@@ -97,221 +97,240 @@ export default function FilesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
-      {/* Header */}
-      <div className="bg-white border-b border-[#EDEDF0] px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="text-[#5F6368] hover:text-[#202124]">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-            <div className="h-6 w-px bg-[#EDEDF0]"></div>
-            <h1 className="text-xl font-semibold text-[#202124]">Google Drive Files</h1>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleRefresh}
-              variant="outline"
-              size="sm"
-              className="refresh-btn"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="upload-btn"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Upload
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="px-6 py-4">
-        <FileSearchBar
-          onFiltersChange={handleFiltersChange}
-        />
-      </div>
-
-      {/* View Toggle */}
-      <div className="px-6 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-            className="view-toggle-btn"
-          >
-            <List className="w-4 h-4 mr-2" />
-            List
-          </Button>
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-            className="view-toggle-btn"
-          >
-            <Grid3X3 className="w-4 h-4 mr-2" />
-            Grid
-          </Button>
-        </div>
-        
-        <div className="text-sm text-[#5F6368]">
-          {filteredAndSortedFiles.length} item{filteredAndSortedFiles.length !== 1 ? 's' : ''}
-        </div>
-      </div>
-
-      {/* File Content */}
-      <div className="px-6 pb-6">
-        {filteredAndSortedFiles.length === 0 ? (
-          <div className="empty-state bg-white rounded-lg border border-[#EDEDF0] p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-[#F8F9FA] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-8 h-8 text-[#9AA0A6]" />
-              </div>
-              <h3 className="text-lg font-medium text-[#202124] mb-2">No files found</h3>
-              <p className="text-[#5F6368] mb-4">
-                Try adjusting your search filters or check your connection.
-              </p>
-            </div>
-          </div>
-        ) : viewMode === 'list' ? (
-          <div className="files-list bg-white rounded-lg border border-[#EDEDF0] overflow-hidden">
-            <Table className="files-table">
-              <TableHeader>
-                <TableRow className="table-header-row border-b border-[#EDEDF0] bg-[#F8F9FA]">
-                  <TableHead className="selection-column text-[#5F6368] font-medium w-12">
-                    <input
-                      type="checkbox"
-                      checked={isAllSelected}
-                      ref={(input) => {
-                        if (input) input.indeterminate = isIndeterminate;
-                      }}
-                      onChange={() => isAllSelected ? deselectAllFiles() : selectAllFiles()}
-                      className="header-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                  </TableHead>
-                  <TableHead className="name-column text-[#5F6368] font-medium">Name</TableHead>
-                  <TableHead className="owner-column text-[#5F6368] font-medium">Owner</TableHead>
-                  <TableHead className="modified-column text-[#5F6368] font-medium">Last modified</TableHead>
-                  <TableHead className="size-column text-[#5F6368] font-medium">File size</TableHead>
-                  <TableHead className="actions-column text-right text-[#5F6368] font-medium">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAndSortedFiles.map((file) => (
-                  <TableRow 
-                    key={file.resource_id} 
-                    className="file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer"
-                  >
-                    <TableCell className="selection-cell">
-                      <input
-                        type="checkbox"
-                        checked={selectedFiles.has(file.resource_id)}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          toggleFileSelection(file.resource_id);
-                        }}
-                        className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                    </TableCell>
-                    <TableCell className="name-cell">
-                      <div className="file-info flex items-center gap-3">
-                        <span className="file-icon">
-                          <FileTypeIcon file={file} />
-                        </span>
-                        <div className="file-details">
-                          <p className="file-name text-[#202124] text-sm">
-                            {getFileName(file)}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="owner-cell text-[#5F6368] text-sm">
-                      me
-                    </TableCell>
-                    <TableCell className="modified-cell text-[#5F6368] text-sm">
-                      {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="size-cell text-[#5F6368] text-sm">
-                      {getFileSize(file)}
-                    </TableCell>
-                    <TableCell className="actions-cell text-right">
-                      <FileActions
-                        file={file}
-                        status={getDisplayStatus(file)}
-                        statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
-                        onIndex={handleIndex}
-                        onDeindex={handleDeindex}
-                        onRemove={handleRemove}
-                        isIndexing={indexMutation.isPending}
-                        isDeindexing={deindexMutation.isPending}
-                        isRemoving={removeFromListingMutation.isPending}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="files-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredAndSortedFiles.map((file) => (
-              <div 
-                key={file.resource_id}
-                className="file-card bg-white rounded-lg border border-[#EDEDF0] p-4 hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="file-card-header flex items-start justify-between mb-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedFiles.has(file.resource_id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      toggleFileSelection(file.resource_id);
-                    }}
-                    className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                  />
-                  <FileActions
-                    file={file}
-                    status={getDisplayStatus(file)}
-                    statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
-                    onIndex={handleIndex}
-                    onDeindex={handleDeindex}
-                    onRemove={handleRemove}
-                    isIndexing={indexMutation.isPending}
-                    isDeindexing={deindexMutation.isPending}
-                    isRemoving={removeFromListingMutation.isPending}
-                  />
+    <div className="files-page checker-background bg-[#FAFAFB] min-h-screen p-5 relative">
+      {/* Elegant Bordered Container */}
+      <div className="max-w-6xl mx-auto mt-8">
+        <div className="rounded-lg border border-[#19191C0A] bg-[#F9F9FA] p-4 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
+          <div className="rounded-lg border border-[#FAFAFB] bg-white shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] overflow-hidden">
+            
+            {/* Google Drive-like Header */}
+            <div className="drive-header bg-white border-b border-[#EDEDF0] px-6 py-4">
+              <div className="header-content flex items-center justify-between">
+                <div className="header-left flex items-center gap-4">
+                  <Link href="/" className="back-button text-[#5F6368] hover:text-zinc-700 transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Link>
+                  <h1 className="page-title text-xl font-normal text-[#202124]">
+                    Google Drive
+                  </h1>
                 </div>
                 
-                <div className="file-card-content text-center">
-                  <div className="file-icon-wrapper mb-3 flex justify-center">
-                    <FileTypeIcon file={file} className="w-12 h-12" />
+                <div className="header-right flex items-center gap-3">
+                  <div className="view-controls flex items-center bg-[#F8F9FA] rounded-lg p-1">
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="view-btn h-8 w-8 p-0"
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className="view-btn h-8 w-8 p-0"
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <h3 className="file-name text-sm font-medium text-[#202124] mb-2 line-clamp-2">
-                    {getFileName(file)}
-                  </h3>
-                  <p className="file-size text-xs text-[#5F6368] mb-2">
-                    {getFileSize(file)}
-                  </p>
-                  <p className="file-date text-xs text-[#5F6368]">
-                    {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
-                  </p>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRefresh}
+                    disabled={filesLoading}
+                    className="refresh-btn border-[#DADCE0] hover:border-zinc-400"
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${filesLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  
+                  <Button size="sm" className="upload-btn">
+                    <Upload className="w-4 h-4 mr-2" />
+                    New
+                  </Button>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="search-section bg-white border-b border-[#EDEDF0] px-6 py-3">
+              <div className="search-container max-w-2xl">
+                <FileSearchBar
+                  onFiltersChange={handleFiltersChange}
+                  placeholder="Search in Drive..."
+                  className="search-bar"
+                />
+              </div>
+            </div>
+
+            {/* File Content */}
+            <div className="file-content flex-1 px-6 py-4">
+              {connectionsLoading ? (
+                <div className="loading-state flex items-center justify-center py-12">
+                  <div className="loading-content flex items-center gap-3 text-[#5F6368]">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span>Connecting to Google Drive...</span>
+                  </div>
+                </div>
+              ) : filesLoading ? (
+                <div className="loading-files-state flex items-center justify-center py-12">
+                  <div className="loading-files-content flex items-center gap-3 text-[#5F6368]">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span>Loading files...</span>
+                  </div>
+                </div>
+              ) : filteredAndSortedFiles.length === 0 ? (
+                <div className="empty-state text-center py-12">
+                  <div className="empty-content max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-[#F8F9FA] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Upload className="w-8 h-8 text-[#9AA0A6]" />
+                    </div>
+                    <h3 className="text-lg font-medium text-[#202124] mb-2">No files found</h3>
+                    <p className="text-[#5F6368] mb-4">
+                      Try adjusting your search filters or check your connection.
+                    </p>
+                  </div>
+                </div>
+              ) : viewMode === 'list' ? (
+                <div className="files-list bg-white rounded-lg border border-[#EDEDF0] overflow-hidden">
+                  <Table className="files-table">
+                    <TableHeader>
+                      <TableRow className="table-header-row border-b border-[#EDEDF0] bg-[#F8F9FA]">
+                        <TableHead className="selection-column text-[#5F6368] font-medium w-12">
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            ref={(input) => {
+                              if (input) input.indeterminate = isIndeterminate;
+                            }}
+                            onChange={() => isAllSelected ? deselectAllFiles() : selectAllFiles()}
+                            className="header-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          />
+                        </TableHead>
+                        <TableHead className="name-column text-[#5F6368] font-medium">Name</TableHead>
+                        <TableHead className="owner-column text-[#5F6368] font-medium">Owner</TableHead>
+                        <TableHead className="modified-column text-[#5F6368] font-medium">Last modified</TableHead>
+                        <TableHead className="size-column text-[#5F6368] font-medium">File size</TableHead>
+                        <TableHead className="actions-column text-right text-[#5F6368] font-medium">
+                          Actions
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAndSortedFiles.map((file) => (
+                        <TableRow 
+                          key={file.resource_id} 
+                          className="file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer"
+                        >
+                          <TableCell className="selection-cell">
+                            <input
+                              type="checkbox"
+                              checked={selectedFiles.has(file.resource_id)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                toggleFileSelection(file.resource_id);
+                              }}
+                              className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                          </TableCell>
+                          <TableCell className="name-cell">
+                            <div className="file-info flex items-center gap-3">
+                              <span className="file-icon">
+                                <FileTypeIcon file={file} />
+                              </span>
+                              <div className="file-details">
+                                <p className="file-name text-[#202124] text-sm">
+                                  {getFileName(file)}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="owner-cell text-[#5F6368] text-sm">
+                            me
+                          </TableCell>
+                          <TableCell className="modified-cell text-[#5F6368] text-sm">
+                            {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="size-cell text-[#5F6368] text-sm">
+                            {getFileSize(file)}
+                          </TableCell>
+                          <TableCell className="actions-cell text-right">
+                            <FileActions
+                              file={file}
+                              status={getDisplayStatus(file)}
+                              statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
+                              onIndex={handleIndex}
+                              onDeindex={handleDeindex}
+                              onRemove={handleRemove}
+                              isIndexing={indexMutation.isPending}
+                              isDeindexing={deindexMutation.isPending}
+                              isRemoving={removeFromListingMutation.isPending}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="files-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {filteredAndSortedFiles.map((file) => (
+                    <div 
+                      key={file.resource_id}
+                      className="file-card bg-white rounded-lg border border-[#EDEDF0] p-4 hover:shadow-md transition-shadow cursor-pointer relative"
+                    >
+                      {/* Selection Checkbox */}
+                      <div className="selection-checkbox absolute top-2 left-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedFiles.has(file.resource_id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleFileSelection(file.resource_id);
+                          }}
+                          className="file-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                      </div>
+                      
+                      <div className="card-content text-center">
+                        <div className="file-icon-large mb-3">
+                          <div className="w-12 h-12 mx-auto">
+                            <FileTypeIcon file={file} className="w-12 h-12" />
+                          </div>
+                        </div>
+                        <p className="file-name text-sm text-[#202124] truncate">
+                          {getFileName(file)}
+                        </p>
+                        
+                        {/* File Size */}
+                        <p className="file-size text-xs text-[#5F6368] mt-1">
+                          {getFileSize(file)}
+                        </p>
+                        
+                        {/* Status Badge - Show for all items */}
+                        <div className="file-status mt-2">
+                          <FileActions
+                            file={file}
+                            status={getDisplayStatus(file)}
+                            statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
+                            onIndex={handleIndex}
+                            onDeindex={handleDeindex}
+                            onRemove={handleRemove}
+                            isIndexing={indexMutation.isPending}
+                            isDeindexing={deindexMutation.isPending}
+                            isRemoving={removeFromListingMutation.isPending}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Dynamic Footer */}
