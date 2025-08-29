@@ -72,19 +72,14 @@ export function FileGridView({
       {/* Grid View */}
       <div className="files-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {currentFolderContents.map((file) => (
-          <div 
-            key={file.resource_id}
-            className={`file-card bg-white rounded-lg border border-[#EDEDF0] p-4 hover:shadow-md transition-all cursor-pointer relative ${
-              isFolderLoading(file.resource_id) ? 'opacity-50' : ''
-            }`}
-            onClick={() => {
-              if (file.inode_type === 'directory') {
-                navigateToFolder(file.resource_id, getFileName(file));
-              }
-            }}
-          >
+                      <div 
+              key={file.resource_id}
+              className={`file-card bg-white rounded-lg border border-[#EDEDF0] p-4 hover:shadow-md transition-all cursor-pointer relative ${
+                isFolderLoading(file.resource_id) ? 'opacity-50' : ''
+              }`}
+            >
             {/* Selection Checkbox */}
-            <div className="selection-checkbox absolute top-2 left-2">
+            <div className="selection-checkbox absolute top-2 left-2" onClick={(e) => e.stopPropagation()}>
               <input
                 type="checkbox"
                 checked={file.inode_type === 'directory' ? isFolderFullySelected(file.resource_id) : selectedFiles.has(file.resource_id)}
@@ -152,7 +147,14 @@ export function FileGridView({
               </DropdownMenu>
             </div>
             
-            <div className="card-content text-center mt-4">
+            <div 
+              className="card-content text-center mt-4 cursor-pointer"
+              onClick={() => {
+                if (file.inode_type === 'directory') {
+                  navigateToFolder(file.resource_id, getFileName(file));
+                }
+              }}
+            >
               <div className="file-icon-large mb-3">
                 <div className="w-12 h-12 mx-auto">
                   <FileTypeIcon file={file} className="w-12 h-12" />
