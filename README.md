@@ -75,12 +75,10 @@ cp .env.example .env.local
 ```bash
 # .env.local
 STACK_AI_API_URL=https://api.stack-ai.com
-STACK_AI_API_KEY=your_stack_ai_api_key
-STACK_AI_ORG_ID=your_organization_id
 SUPABASE_AUTH_URL=https://sb.stack-ai.com
-SUPABASE_ANON_KEY=your_supabase_anon_key
-STACK_AI_EMAIL=your_test_email
-STACK_AI_PASSWORD=your_test_password
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+STACK_AI_EMAIL=your_test_email_here
+STACK_AI_PASSWORD=your_test_password_here
 ```
 
 ### Running the Application
