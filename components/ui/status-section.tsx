@@ -84,11 +84,11 @@ export function StatusSection({
         <h1 className="font-[Poppins] text-2xl font-light text-[#2D2D31]">
           Congratulations!
         </h1>
-      ) : (
+      ) : selectedProvider === 'google-drive' ? (
         <h1 className="font-[Poppins] text-2xl font-light text-[#2D2D31]">
           Check connection
         </h1>
-      )}
+      ) : null}
 
       <p className="mt-2 mb-8">
         {providerStatuses[selectedProvider] === "success" && isConnected ? (
