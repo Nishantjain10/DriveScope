@@ -51,6 +51,8 @@ export default function FilesPage() {
     
     // Folder functions
     toggleFolderExpansion,
+    getFilesInFolder,
+    isFolderLoading,
     
     // Selection functions
     toggleFileSelection,
@@ -298,12 +300,20 @@ export default function FilesPage() {
                           {/* Sub-files within expanded folders */}
                           {file.inode_type === 'directory' && expandedFolders.has(file.resource_id) && (
                             <>
-                              {filteredAndSortedFiles
-                                .filter(subFile => 
-                                  subFile.inode_type === 'file' && 
-                                  subFile.inode_path?.path?.startsWith((file.inode_path?.path || file.inode_path?.name || '') + '/')
-                                )
-                                .map((subFile) => (
+                              {/* Loading state for folder */}
+                              {isFolderLoading(file.resource_id) && (
+                                <TableRow className="sub-file-row border-b border-[#EDEDF0] bg-[#FAFAFB]">
+                                  <TableCell colSpan={6} className="text-center py-4">
+                                    <div className="flex items-center justify-center gap-2 text-[#5F6368]">
+                                      <RefreshCw className="w-4 h-4 animate-spin" />
+                                      Loading folder contents...
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                              
+                              {/* Actual sub-files */}
+                              {!isFolderLoading(file.resource_id) && getFilesInFolder(file.resource_id).map((subFile) => (
                                   <TableRow 
                                     key={`${file.resource_id}-${subFile.resource_id}`}
                                     className="sub-file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer bg-[#FAFAFB]"

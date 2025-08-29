@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useConnections, useFiles } from '@/hooks/use-files';
+import { listFiles } from '@/lib/api/files';
 import type { FileResource } from '@/lib/types/api';
 import type { FileSearchFilters } from '@/components/ui/file-search-bar';
 
@@ -262,27 +263,54 @@ export function useFileExplorer() {
   };
 
   // Folder functions
-  const toggleFolderExpansion = (folderId: string) => {
-    setExpandedFolders(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(folderId)) {
+  const [folderContents, setFolderContents] = useState<Record<string, FileResource[]>>({});
+  const [loadingFolders, setLoadingFolders] = useState<Set<string>>(new Set());
+
+  const toggleFolderExpansion = async (folderId: string) => {
+    if (expandedFolders.has(folderId)) {
+      // Collapse folder
+      setExpandedFolders(prev => {
+        const newSet = new Set(prev);
         newSet.delete(folderId);
-      } else {
-        newSet.add(folderId);
+        return newSet;
+      });
+    } else {
+      // Expand folder - fetch contents if not already loaded
+      setExpandedFolders(prev => new Set([...prev, folderId]));
+      
+      if (!folderContents[folderId] && connectionId) {
+        setLoadingFolders(prev => new Set([...prev, folderId]));
+        
+        try {
+          const response = await listFiles(connectionId, { resource_id: folderId });
+          setFolderContents(prev => ({
+            ...prev,
+            [folderId]: response.data || []
+          }));
+        } catch (error) {
+          console.error('Failed to fetch folder contents:', error);
+          toast.error('Failed to load folder contents');
+        } finally {
+          setLoadingFolders(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(folderId);
+            return newSet;
+          });
+        }
       }
-      return newSet;
-    });
+    }
   };
 
   const isFolderExpanded = (folderId: string) => {
     return expandedFolders.has(folderId);
   };
 
-  const getFilesInFolder = (folderPath: string) => {
-    return files.filter(file => 
-      file.inode_path?.path?.startsWith(folderPath + '/') && 
-      file.inode_type === 'file'
-    );
+  const getFilesInFolder = (folderId: string) => {
+    return folderContents[folderId] || [];
+  };
+
+  const isFolderLoading = (folderId: string) => {
+    return loadingFolders.has(folderId);
   };
 
   // Selection functions
@@ -391,6 +419,7 @@ export function useFileExplorer() {
     toggleFolderExpansion,
     isFolderExpanded,
     getFilesInFolder,
+    isFolderLoading,
     
     // Selection functions
     toggleFileSelection,
