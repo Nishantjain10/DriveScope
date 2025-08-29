@@ -74,12 +74,24 @@ cp .env.example .env.local
 
 ```bash
 # .env.local
+# CLIENT-SIDE VARIABLES (Public - exposed to browser)
+NEXT_PUBLIC_APP_NAME=DriveScope
+NEXT_PUBLIC_APP_VERSION=1.0.0
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_SUPPORT_EMAIL=support@drivescope.dev
+
+# SERVER-SIDE VARIABLES (Secure - never exposed to browser)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
 STACK_AI_API_URL=https://api.stack-ai.com
+STACK_AI_API_KEY=your_stack_ai_api_key
+STACK_AI_ORG_ID=your_organization_id
 SUPABASE_AUTH_URL=https://sb.stack-ai.com
-SUPABASE_ANON_KEY=your_supabase_anon_key_here
-STACK_AI_EMAIL=your_test_email_here
-STACK_AI_PASSWORD=your_test_password_here
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+**🔒 Security Note**: Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. All sensitive data (API keys, secrets) are kept server-side and accessed through secure API routes.
 
 ### Running the Application
 
@@ -97,6 +109,20 @@ npm run type-check
 ```
 
 **🌐 Open [http://localhost:3000](http://localhost:3000) in your browser**
+
+## 🔒 Security & Configuration
+
+### **Environment Variable Security**
+- **Client-Side Variables**: Only public, non-sensitive data with `NEXT_PUBLIC_` prefix
+- **Server-Side Variables**: All sensitive data (API keys, secrets) kept secure
+- **API Routes**: Sensitive configuration accessed through secure server endpoints
+- **No Exposure**: API keys and secrets never bundled into client-side code
+
+### **Security Features**
+- **OAuth2 Authentication**: Secure Google Drive integration
+- **API Key Protection**: Server-side API key management
+- **Environment Validation**: Runtime configuration validation
+- **Error Handling**: Secure error messages without data leakage
 
 ## 🛠️ Tech Stack
 
@@ -426,6 +452,8 @@ vercel --prod
 ### **Environment Variables for Production**
 ```bash
 # Required for production
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_client_id
+GOOGLE_CLIENT_SECRET=your_production_client_secret
 NEXT_PUBLIC_API_BASE_URL=https://api.stack-ai.com
 STACK_AI_API_KEY=your_production_api_key
 STACK_AI_ORG_ID=your_production_org_id

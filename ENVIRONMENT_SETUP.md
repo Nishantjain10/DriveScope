@@ -6,13 +6,13 @@ This project requires several environment variables to connect to the Stack AI A
 
 ```bash
 # Stack AI API Configuration
-STACK_AI_API_URL=https://api.stack-ai.com
-SUPABASE_AUTH_URL=https://sb.stack-ai.com
-SUPABASE_ANON_KEY=your_supabase_anon_key_here
+NEXT_PUBLIC_STACK_AI_API_URL=https://api.stack-ai.com
+NEXT_PUBLIC_SUPABASE_AUTH_URL=https://sb.stack-ai.com
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # Stack AI Test Credentials (for development only)
-STACK_AI_EMAIL=your_test_email_here
-STACK_AI_PASSWORD=your_test_password_here
+NEXT_PUBLIC_STACK_AI_EMAIL=your_test_email_here
+NEXT_PUBLIC_STACK_AI_PASSWORD=your_test_password_here
 ```
 
 ## Getting the Values

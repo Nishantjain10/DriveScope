@@ -258,13 +258,13 @@ export default function Home() {
                 <div className="flex flex-col">
                   <span className="text-[#97979B]">Stack AI URL</span>
                   <span className="truncate text-xs">
-                    {process.env.STACK_AI_API_URL || "Not configured"}
+                    {process.env.NEXT_PUBLIC_STACK_AI_API_URL || "Not configured"}
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[#97979B]">Supabase URL</span>
                   <span className="truncate text-xs">
-                    {process.env.SUPABASE_AUTH_URL || "Not configured"}
+                    {process.env.NEXT_PUBLIC_SUPABASE_AUTH_URL || "Not configured"}
                   </span>
                 </div>
                 <div className="flex flex-col">
