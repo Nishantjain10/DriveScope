@@ -56,10 +56,13 @@ export default function FilesPage() {
     
     // Selection functions
     toggleFileSelection,
+    toggleFolderSelection,
     selectAllFiles,
     deselectAllFiles,
     isAllSelected,
     isIndeterminate,
+    isFolderFullySelected,
+    isFolderPartiallySelected,
     
     // Actions
     setViewMode,
@@ -177,17 +180,31 @@ export default function FilesPage() {
             {/* File Content */}
             <div className="file-content flex-1 px-6 py-4">
               {connectionsLoading ? (
-                <div className="loading-state flex items-center justify-center py-12">
-                  <div className="loading-content flex items-center gap-3 text-[#5F6368]">
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                    <span>Connecting to Google Drive...</span>
+                <div className="loading-state flex items-center justify-center py-16">
+                  <div className="loading-content text-center max-w-md mx-auto">
+                    <div className="loading-animation mb-6">
+                      <div className="loading-dots flex justify-center gap-2">
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                    <p className="text-[#5F6368] text-lg font-medium mb-2">Connecting to Google Drive...</p>
+                    <p className="text-[#9AA0A6] text-sm">Establishing secure connection</p>
                   </div>
                 </div>
               ) : filesLoading ? (
-                <div className="loading-files-state flex items-center justify-center py-12">
-                  <div className="loading-files-content flex items-center gap-3 text-[#5F6368]">
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                    <span>Loading files...</span>
+                <div className="loading-files-state flex items-center justify-center py-16">
+                  <div className="loading-content text-center max-w-md mx-auto">
+                    <div className="loading-animation mb-6">
+                      <div className="loading-dots flex justify-center gap-2">
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                    <p className="text-[#5F6368] text-lg font-medium mb-2">Loading your files...</p>
+                    <p className="text-[#9AA0A6] text-sm">Please wait while we fetch your Drive contents</p>
                   </div>
                 </div>
               ) : filteredAndSortedFiles.length === 0 ? (
@@ -234,17 +251,26 @@ export default function FilesPage() {
                           <TableRow 
                             className="file-row hover:bg-[#F8F9FA] border-b border-[#EDEDF0] cursor-pointer"
                           >
-                            <TableCell className="selection-cell">
-                              <input
-                                type="checkbox"
-                                checked={selectedFiles.has(file.resource_id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
+                                                      <TableCell className="selection-cell">
+                            <input
+                              type="checkbox"
+                              checked={file.inode_type === 'directory' ? isFolderFullySelected(file.resource_id) : selectedFiles.has(file.resource_id)}
+                              ref={(input) => {
+                                if (input && file.inode_type === 'directory') {
+                                  input.indeterminate = isFolderPartiallySelected(file.resource_id);
+                                }
+                              }}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                if (file.inode_type === 'directory') {
+                                  toggleFolderSelection(file.resource_id);
+                                } else {
                                   toggleFileSelection(file.resource_id);
-                                }}
-                                className="file-checkbox"
-                              />
-                            </TableCell>
+                                }
+                              }}
+                              className="file-checkbox"
+                            />
+                          </TableCell>
                             <TableCell className="name-cell">
                               <div className="file-info flex items-center gap-3">
                                 <span className="file-icon">

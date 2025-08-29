@@ -326,9 +326,38 @@ export function useFileExplorer() {
     });
   };
 
+  const toggleFolderSelection = (folderId: string) => {
+    const subFiles = folderContents[folderId] || [];
+    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
+    
+    setSelectedFiles(prev => {
+      const newSet = new Set(prev);
+      const isCurrentlySelected = allFolderFileIds.every(id => newSet.has(id));
+      
+      if (isCurrentlySelected) {
+        // Deselect all files in folder
+        allFolderFileIds.forEach(id => newSet.delete(id));
+      } else {
+        // Select all files in folder
+        allFolderFileIds.forEach(id => newSet.add(id));
+      }
+      
+      return newSet;
+    });
+  };
+
   const selectAllFiles = () => {
-    const allFileIds = files.map(file => file.resource_id);
-    setSelectedFiles(new Set(allFileIds));
+    const allFileIds = new Set<string>();
+    
+    // Add root files
+    files.forEach(file => allFileIds.add(file.resource_id));
+    
+    // Add all sub-files from expanded folders
+    Object.values(folderContents).forEach(subFiles => {
+      subFiles.forEach(subFile => allFileIds.add(subFile.resource_id));
+    });
+    
+    setSelectedFiles(allFileIds);
   };
 
   const deselectAllFiles = () => {
@@ -337,6 +366,19 @@ export function useFileExplorer() {
 
   const isAllSelected = selectedFiles.size === files.length && files.length > 0;
   const isIndeterminate = selectedFiles.size > 0 && selectedFiles.size < files.length;
+
+  const isFolderFullySelected = (folderId: string) => {
+    const subFiles = folderContents[folderId] || [];
+    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
+    return allFolderFileIds.every(id => selectedFiles.has(id));
+  };
+
+  const isFolderPartiallySelected = (folderId: string) => {
+    const subFiles = folderContents[folderId] || [];
+    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
+    const selectedCount = allFolderFileIds.filter(id => selectedFiles.has(id)).length;
+    return selectedCount > 0 && selectedCount < allFolderFileIds.length;
+  };
 
   // Filter and sort files
   const filteredAndSortedFiles = files
@@ -423,10 +465,13 @@ export function useFileExplorer() {
     
     // Selection functions
     toggleFileSelection,
+    toggleFolderSelection,
     selectAllFiles,
     deselectAllFiles,
     isAllSelected,
     isIndeterminate,
+    isFolderFullySelected,
+    isFolderPartiallySelected,
     
     // Actions
     setViewMode,
