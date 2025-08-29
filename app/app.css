@@ -110,6 +110,31 @@
   border-color: var(--cb-bg-checked-hover);
 }
 
+/* Interactive elements cursor styles */
+.files-page button,
+.files-page input[type="checkbox"],
+.files-page .expand-button,
+.files-page .file-checkbox,
+.files-page .header-checkbox,
+.files-page .table-row,
+.files-page .sub-file-row,
+.files-page .sub-sub-file-row,
+.files-page .file-info,
+.files-page .file-name,
+.files-page .file-icon,
+.files-page .actions-cell,
+.files-page .selection-cell,
+.files-page .name-cell {
+  cursor: pointer;
+}
+
+/* Specific cursor overrides for non-interactive elements */
+.files-page .owner-cell,
+.files-page .modified-cell,
+.files-page .size-cell {
+  cursor: default;
+}
+
 /* disabled */
 .file-checkbox:disabled,
 .header-checkbox:disabled {

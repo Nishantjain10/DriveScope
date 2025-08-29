@@ -700,6 +700,18 @@ export function useFileExplorer() {
     return total;
   }, [files, folderContents, expandedFolders]);
 
+  // Calculate total selectable files (including files in selected but collapsed folders)
+  const getTotalSelectableFiles = useCallback(() => {
+    let total = files.length;
+    
+    // Add files from all loaded folders (whether expanded or not)
+    Object.values(folderContents).forEach(subFiles => {
+      total += subFiles.length;
+    });
+    
+    return total;
+  }, [files, folderContents]);
+
   // Check if all visible files are selected
   const isAllSelected = useCallback(() => {
     const totalVisible = getTotalVisibleFiles();
@@ -716,6 +728,20 @@ export function useFileExplorer() {
     // 3. There are actually files to select (total > 0)
     return selectedFiles.size > 0 && selectedFiles.size < totalVisible && totalVisible > 0;
   }, [selectedFiles.size, getTotalVisibleFiles]);
+
+  // Enhanced check for indeterminate state that considers all selectable files
+  const isIndeterminateEnhanced = useCallback(() => {
+    const totalSelectable = getTotalSelectableFiles();
+    const totalVisible = getTotalVisibleFiles();
+    
+    // If we have loaded folder contents, use the more accurate count
+    if (Object.keys(folderContents).length > 0) {
+      return selectedFiles.size > 0 && selectedFiles.size < totalSelectable && totalSelectable > 0;
+    }
+    
+    // Fallback to visible count for unloaded folders
+    return selectedFiles.size > 0 && selectedFiles.size < totalVisible && totalVisible > 0;
+  }, [selectedFiles.size, getTotalSelectableFiles, getTotalVisibleFiles, folderContents]);
 
   // Enhanced folder selection state checking
   const isFolderFullySelected = useCallback((folderId: string) => {
@@ -906,6 +932,7 @@ export function useFileExplorer() {
     deselectAllFiles,
     isAllSelected,
     isIndeterminate,
+    isIndeterminateEnhanced,
     isFolderFullySelected,
     isFolderPartiallySelected,
     getTotalSelectedCount,

@@ -65,6 +65,7 @@ export default function FilesPage() {
     deselectAllFiles,
     isAllSelected,
     isIndeterminate,
+    isIndeterminateEnhanced,
     isFolderFullySelected,
     isFolderPartiallySelected,
     getTotalSelectedCount,
@@ -273,7 +274,7 @@ export default function FilesPage() {
                               type="checkbox"
                               checked={isAllSelected()}
                               ref={(input) => {
-                                if (input) input.indeterminate = isIndeterminate();
+                                if (input) input.indeterminate = isIndeterminateEnhanced();
                               }}
                               onChange={() => isAllSelected() ? deselectAllFiles() : selectAllFiles()}
                               className="header-checkbox"
