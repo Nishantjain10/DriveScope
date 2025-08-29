@@ -542,6 +542,42 @@ export function useFileExplorer() {
     }
   }, [getDirectFolderContents, currentFolderId, loadingFolders]);
 
+  // Navigate to breadcrumb location without adding to stack (like Windows Explorer)
+  const navigateToBreadcrumb = useCallback(async (targetStack: Array<{ id: string; name: string }>, targetFolder: { id: string; name: string }) => {
+    // Prevent navigation if already in the target folder
+    if (currentFolderId === targetFolder.id) {
+      return; // Already in this folder, do nothing
+    }
+
+    // Prevent multiple rapid clicks by checking if already loading
+    if (loadingFolders.has(targetFolder.id)) {
+      return; // Already loading this folder, do nothing
+    }
+
+    setLoadingFolders(prev => new Set([...prev, targetFolder.id]));
+
+    try {
+      const contents = await getDirectFolderContents(targetFolder.id);
+      setCurrentFolderContents(contents);
+      setCurrentFolderId(targetFolder.id);
+      // Replace the entire navigation stack with the target stack (no duplicates)
+      setNavigationStack(targetStack);
+
+      setFolderContents(prev => ({
+        ...prev,
+        [targetFolder.id]: contents
+      }));
+    } catch (error) {
+      toast.error('Failed to open folder');
+    } finally {
+      setLoadingFolders(prev => {
+        const next = new Set(prev);
+        next.delete(targetFolder.id);
+        return next;
+      });
+    }
+  }, [getDirectFolderContents, currentFolderId, loadingFolders]);
+
   const navigateBack = useCallback(() => {
     const newStack = navigationStack.slice(0, -1);
     setNavigationStack(newStack);
@@ -936,6 +972,7 @@ export function useFileExplorer() {
 
     // Navigation functions
     navigateToFolder,
+    navigateToBreadcrumb,
     navigateBack,
     getCurrentPath,
 

@@ -22,6 +22,7 @@ interface FileGridViewProps {
   isFolderPartiallySelected: (folderId: string) => boolean;
   selectedFiles: Set<string>;
   navigateToFolder: (folderId: string, folderName: string) => void;
+  navigateToBreadcrumb: (targetStack: Array<{ id: string; name: string }>, targetFolder: { id: string; name: string }) => void;
   navigateBack: () => void;
   toggleFileSelection: (fileId: string) => void;
   toggleFolderSelection: (folderId: string) => void;
@@ -46,6 +47,7 @@ export function FileGridView({
   isFolderPartiallySelected,
   selectedFiles,
   navigateToFolder,
+  navigateToBreadcrumb,
   navigateBack,
   toggleFileSelection,
   toggleFolderSelection,
@@ -64,6 +66,7 @@ export function FileGridView({
         navigationStack={navigationStack}
         navigateBack={navigateBack}
         navigateToFolder={navigateToFolder}
+        navigateToBreadcrumb={navigateToBreadcrumb}
       />
 
       {/* Loading Bar */}

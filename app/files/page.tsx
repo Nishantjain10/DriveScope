@@ -63,6 +63,7 @@ export default function FilesPage() {
     
     // Navigation functions
     navigateToFolder,
+    navigateToBreadcrumb,
     navigateBack,
     
     // Selection functions
@@ -307,6 +308,7 @@ export default function FilesPage() {
                   isFolderPartiallySelected={isFolderPartiallySelected}
                   selectedFiles={selectedFiles}
                   navigateToFolder={navigateToFolder}
+                  navigateToBreadcrumb={navigateToBreadcrumb}
                   navigateBack={navigateBack}
                   toggleFileSelection={toggleFileSelection}
                   toggleFolderSelection={toggleFolderSelection}

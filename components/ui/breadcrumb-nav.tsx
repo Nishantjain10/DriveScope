@@ -8,6 +8,7 @@ interface BreadcrumbNavProps {
   navigationStack: Array<{ id: string; name: string; }>;
   navigateBack: () => void;
   navigateToFolder: (folderId: string, folderName: string) => void;
+  navigateToBreadcrumb: (targetStack: Array<{ id: string; name: string }>, targetFolder: { id: string; name: string }) => void;
 }
 
 export function BreadcrumbNav({
@@ -15,6 +16,7 @@ export function BreadcrumbNav({
   navigationStack,
   navigateBack,
   navigateToFolder,
+  navigateToBreadcrumb,
 }: BreadcrumbNavProps) {
   return (
     <div className="folder-navigation mb-4 flex items-center gap-2 text-sm">
@@ -40,7 +42,8 @@ export function BreadcrumbNav({
                     // Navigate to this folder by slicing the stack up to this point
                     const targetStack = navigationStack.slice(0, index + 1);
                     const targetFolder = targetStack[targetStack.length - 1];
-                    navigateToFolder(targetFolder.id, targetFolder.name);
+                    // Use navigateToBreadcrumb instead of navigateToFolder to avoid duplicates
+                    navigateToBreadcrumb(targetStack, targetFolder);
                   }
                 }}
                 className={`${
