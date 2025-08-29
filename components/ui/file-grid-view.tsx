@@ -127,7 +127,7 @@ export function FileGridView({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.preventDefault();
                       if (getDisplayStatus(file) === 'indexed') {
                         handleDeindex(file.resource_id);
                       } else {
@@ -154,7 +154,7 @@ export function FileGridView({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.preventDefault();
                       handleRemove(file.inode_path.path || file.resource_id);
                     }}
                     disabled={removeFromListingMutation.isPending}
