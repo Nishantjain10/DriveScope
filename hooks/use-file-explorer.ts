@@ -885,6 +885,28 @@ export function useFileExplorer() {
 
   // Get files to filter based on current context (root files or current folder contents)
   const getFilesToFilter = useCallback(() => {
+    // Check if any filters are active (excluding sort-only filters)
+    const hasActiveFilters = 
+      searchFilters.query !== '' || 
+      searchFilters.fileType !== 'all' || 
+      searchFilters.indexStatus !== 'all';
+
+    // If filters are active, do a global search across all loaded files
+    if (hasActiveFilters) {
+      const allFiles = new Set<FileResource>();
+      
+      // Add root files
+      files.forEach(file => allFiles.add(file));
+      
+      // Add all files from loaded folder contents
+      Object.values(folderContents).forEach(subFiles => {
+        subFiles.forEach(subFile => allFiles.add(subFile));
+      });
+      
+      return Array.from(allFiles);
+    }
+    
+    // If no filters are active, use location-based filtering
     // If we're in a specific folder (grid view navigation), use current folder contents
     if (currentFolderId) {
       return currentFolderContents;
@@ -897,7 +919,7 @@ export function useFileExplorer() {
       );
       return !isInSubfolder;
     });
-  }, [currentFolderId, currentFolderContents, files, folderContents]);
+  }, [currentFolderId, currentFolderContents, files, folderContents, searchFilters]);
 
   // Filter and sort
   const filteredAndSortedFiles = getFilesToFilter()
