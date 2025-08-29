@@ -34,6 +34,7 @@ export default function FilesPage() {
     filesLoading,
     connectionsError,
     isBulkIndexing,
+    isRefreshing,
     
     // Mutations
     indexMutation,
@@ -191,11 +192,11 @@ export default function FilesPage() {
                     variant="outline" 
                     size="sm" 
                     onClick={handleRefresh}
-                    disabled={filesLoading}
+                    disabled={isRefreshing}
                     className="refresh-btn border-[#DADCE0] hover:border-zinc-400"
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${filesLoading ? 'animate-spin' : ''}`} />
-                    Refresh
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
                   </Button>
                   
                   <Button size="sm" className="upload-btn">

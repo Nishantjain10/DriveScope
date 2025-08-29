@@ -25,6 +25,7 @@ export function useFileExplorer() {
   const [fileStatuses, setFileStatuses] = useState<Record<string, string>>({});
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [isBulkIndexing, setIsBulkIndexing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // API queries
   const { 
@@ -216,6 +217,8 @@ export function useFileExplorer() {
     console.log('🔄 Current connectionId:', connectionId);
     console.log('🔄 Current files count:', files.length);
     
+    setIsRefreshing(true);
+    
     try {
       // Clear folder contents to force fresh fetch
       setFolderContents({});
@@ -234,6 +237,8 @@ export function useFileExplorer() {
     } catch (error) {
       console.error('Refresh error:', error);
       toast.error('Failed to refresh files. Please try again.');
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -645,6 +650,7 @@ export function useFileExplorer() {
     filesLoading,
     connectionsError,
     isBulkIndexing,
+    isRefreshing,
     
     // Mutations
     indexMutation,
