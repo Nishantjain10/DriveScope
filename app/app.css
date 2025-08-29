@@ -84,7 +84,10 @@
   /* When all files are selected, show minus icon to deselect all */
   border-color: var(--cb-bg-checked);
   background-color: var(--cb-bg-checked);
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M4 12h12'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M5 12h14'/%3e%3c/svg%3e");
+  background-size: 50% 50%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .header-checkbox:checked:hover {
@@ -96,9 +99,10 @@
 .header-checkbox:indeterminate {
   border-color: var(--cb-bg-checked);
   background-color: var(--cb-bg-checked);
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M10 4v12M4 10h12'/%3e%3c/svg%3e");
-  background-size: 60% 60%;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M12 5v14M5 12h14'/%3e%3c/svg%3e");
+  background-size: 50% 50%;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .header-checkbox:indeterminate:hover {

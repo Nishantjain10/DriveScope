@@ -690,9 +690,14 @@ export function useFileExplorer() {
   }, [selectedFiles.size, getTotalVisibleFiles]);
 
   // Check if some files are selected (indeterminate state)
+  // This should show the plus icon when some files are selected but not all
   const isIndeterminate = useCallback(() => {
     const totalVisible = getTotalVisibleFiles();
-    return selectedFiles.size > 0 && selectedFiles.size < totalVisible;
+    // Show indeterminate (plus icon) when:
+    // 1. Some files are selected (more than 0)
+    // 2. Not all files are selected (less than total)
+    // 3. There are actually files to select (total > 0)
+    return selectedFiles.size > 0 && selectedFiles.size < totalVisible && totalVisible > 0;
   }, [selectedFiles.size, getTotalVisibleFiles]);
 
   // Enhanced folder selection state checking
