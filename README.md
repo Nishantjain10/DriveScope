@@ -426,8 +426,6 @@ vercel --prod
 ### **Environment Variables for Production**
 ```bash
 # Required for production
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_client_id
-GOOGLE_CLIENT_SECRET=your_production_client_secret
 NEXT_PUBLIC_API_BASE_URL=https://api.stack-ai.com
 STACK_AI_API_KEY=your_production_api_key
 STACK_AI_ORG_ID=your_production_org_id
