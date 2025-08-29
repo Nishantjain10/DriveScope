@@ -527,6 +527,17 @@ export function useFileExplorer() {
         [folderId]: directFiles
       }));
       
+      // Auto-select all sub-files if the parent folder is already selected
+      // This preserves selections during loading
+      if (selectedFiles.has(folderId)) {
+        const newSelectedFiles = new Set(selectedFiles);
+        directFiles.forEach(subFile => {
+          newSelectedFiles.add(subFile.resource_id);
+        });
+        setSelectedFiles(newSelectedFiles);
+        console.log('🔄 Auto-selected', directFiles.length, 'sub-files for auto-loaded folder:', folderId);
+      }
+      
       console.log('🔄 Auto-loaded', directFiles.length, 'direct files from folder:', folderId);
     } catch (error) {
       console.error('Failed to auto-load folder contents:', error);
@@ -537,7 +548,7 @@ export function useFileExplorer() {
         return newSet;
       });
     }
-  }, [connectionId, folderContents, getDirectFolderContents]);
+  }, [connectionId, folderContents, getDirectFolderContents, selectedFiles]);
 
   const toggleFolderExpansion = async (folderId: string) => {
     if (expandedFolders.has(folderId)) {
@@ -635,6 +646,12 @@ export function useFileExplorer() {
       
       return newSet;
     });
+    
+    // Force a re-render to update header checkbox state
+    // This ensures the indeterminate state is properly calculated
+    setTimeout(() => {
+      setSelectedFiles(current => new Set(current));
+    }, 0);
   }, [folderContents, loadingFolders, autoLoadFolderContents]);
 
   // Enhanced select all to include nested folder contents
@@ -673,7 +690,7 @@ export function useFileExplorer() {
   const getTotalVisibleFiles = useCallback(() => {
     let total = files.length;
     
-    // Add visible subfolder files
+    // Add visible subfolder files from expanded folders
     Object.entries(folderContents).forEach(([folderId, subFiles]) => {
       if (expandedFolders.has(folderId)) {
         total += subFiles.length;
