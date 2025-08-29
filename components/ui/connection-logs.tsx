@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import type { Connection } from '@/lib/types/api';
 
 interface LogEntry {
@@ -21,38 +21,44 @@ interface ConnectionLogsProps {
 
 export function ConnectionLogs({ logs, showLogs, connections }: ConnectionLogsProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [isOpen, setIsOpen] = useState(showLogs);
+  const [mounted, setMounted] = useState(false);
 
-  const updateHeight = useCallback(() => {
-    if (detailsRef.current) {
-      // This will be handled by the parent component
-      // const height = detailsRef.current.clientHeight;
-      // You can emit this height to parent if needed
-    }
+  // Ensure component is mounted to avoid hydration issues
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
+  // Sync with parent state
   useEffect(() => {
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, [updateHeight]);
+    if (mounted) {
+      setIsOpen(showLogs);
+    }
+  }, [showLogs, mounted]);
 
+  // Handle toggle manually to avoid hydration issues
+  const handleToggle = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
+  // Ensure details element is properly controlled
   useEffect(() => {
-    const currentDetails = detailsRef.current;
-    if (!currentDetails) return;
-    
-    currentDetails.addEventListener("toggle", updateHeight);
-
-    return () => {
-      if (currentDetails) {
-        currentDetails.removeEventListener("toggle", updateHeight);
+    if (detailsRef.current && mounted) {
+      if (isOpen) {
+        detailsRef.current.setAttribute('open', '');
+      } else {
+        detailsRef.current.removeAttribute('open');
       }
-    };
-  }, [updateHeight]);
+    }
+  }, [isOpen, mounted]);
 
   return (
     <aside className="fixed bottom-0 flex w-full cursor-pointer border-t border-[#EDEDF0] bg-white">
-      <details open={showLogs} ref={detailsRef} className="w-full">
-        <summary className="flex w-full flex-row justify-between p-4 marker:content-none">
+      <details ref={detailsRef} className="w-full">
+        <summary 
+          className="flex w-full flex-row justify-between p-4 marker:content-none cursor-pointer"
+          onClick={handleToggle}
+        >
           <div className="flex gap-2">
             <span className="font-semibold">Connection Logs</span>
             {logs.length > 0 && (
@@ -62,10 +68,20 @@ export function ConnectionLogs({ logs, showLogs, connections }: ConnectionLogsPr
             )}
           </div>
           <div className="icon text-xl flex items-center justify-center">
-            {showLogs ? (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
+            {mounted ? (
+              <>
+                {isOpen ? (
+                  <ChevronDown className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <ChevronUp className="w-5 h-5 text-gray-600" />
+                )}
+                {/* Fallback icon in case Lucide icons fail */}
+                <span className="sr-only">
+                  {isOpen ? 'Collapse logs' : 'Expand logs'}
+                </span>
+              </>
             ) : (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-600">⌄</span>
             )}
           </div>
         </summary>
