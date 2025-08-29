@@ -191,7 +191,6 @@ class StackAIClient {
    */
   async authenticateWithTestCredentials(): Promise<AuthHeaders> {
     // These credentials are provided in the task specification for testing
-    // Task file states: Email: stackaitest@gmail.com, Password: !z4ZnxkyLYs#vR
     const testEmail = process.env.STACK_AI_EMAIL;
     const testPassword = process.env.STACK_AI_PASSWORD;
     
