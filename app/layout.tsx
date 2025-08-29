@@ -40,7 +40,19 @@ export default function RootLayout({
       >
                         <QueryProvider>
                   {children}
-                  <Toaster position="top-right" richColors />
+                  <Toaster 
+                    position="top-right" 
+                    richColors={false}
+                    toastOptions={{
+                      style: {
+                        background: '#FFFFFF',
+                        color: '#18181B',
+                        border: '1px solid #EDEDF0',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      },
+                    }}
+                  />
                 </QueryProvider>
       </body>
     </html>

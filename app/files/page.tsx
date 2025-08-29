@@ -83,13 +83,43 @@ export default function FilesPage() {
     removeFromListingMutation.mutate({ resourcePath });
   };
 
-  // Loading state
+  // Loading state - now within the drive wrapper
   if (connectionsLoading || filesLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#18181B] mx-auto mb-4"></div>
-          <p className="text-[#5F6368]">Loading files...</p>
+      <div className="min-h-screen bg-[#F8F9FA] checker-background relative">
+        <div className="container mx-auto px-4 py-8">
+          <div className="drive-wrapper bg-white rounded-2xl border border-[#EDEDF0] shadow-lg overflow-hidden">
+            <div className="drive-header bg-[#F8F9FA] border-b border-[#EDEDF0] px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Link href="/" className="text-[#5F6368] hover:text-[#18181B] transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Link>
+                  <h1 className="text-xl font-semibold text-[#18181B]">Google Drive</h1>
+                </div>
+              </div>
+            </div>
+            
+            <div className="file-content flex-1 px-6 py-16">
+              <div className="loading-state flex items-center justify-center">
+                <div className="loading-content text-center max-w-md mx-auto">
+                  <div className="loading-animation mb-6">
+                    <div className="loading-dots flex justify-center gap-2">
+                      <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-3 h-3 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </div>
+                  <p className="text-[#5F6368] text-lg font-medium mb-2">
+                    {connectionsLoading ? 'Connecting to Google Drive...' : 'Loading your files...'}
+                  </p>
+                  <p className="text-[#9AA0A6] text-sm">
+                    {connectionsLoading ? 'Establishing secure connection' : 'Please wait while we fetch your Drive contents'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -330,10 +360,16 @@ export default function FilesPage() {
                               {/* Loading state for folder */}
                               {isFolderLoading(file.resource_id) && (
                                 <TableRow className="sub-file-row border-b border-[#EDEDF0] bg-[#FAFAFB]">
-                                  <TableCell colSpan={6} className="text-center py-4">
-                                    <div className="flex items-center justify-center gap-2 text-[#5F6368]">
-                                      <RefreshCw className="w-4 h-4 animate-spin" />
-                                      Loading folder contents...
+                                  <TableCell colSpan={6} className="text-center py-6">
+                                    <div className="loading-content text-center max-w-sm mx-auto">
+                                      <div className="loading-animation mb-4">
+                                        <div className="loading-dots flex justify-center gap-2">
+                                          <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                          <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                          <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                        </div>
+                                      </div>
+                                      <p className="text-[#5F6368] text-sm font-medium">Loading folder contents...</p>
                                     </div>
                                   </TableCell>
                                 </TableRow>

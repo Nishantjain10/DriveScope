@@ -139,7 +139,7 @@ export default function TestPage() {
                 <div className="badges-section">
                   <h3 className="subsection-title text-md font-medium text-[#202124] mb-3">File Status</h3>
                   <div className="badge-group flex flex-wrap gap-2">
-                    <Badge className="indexed-badge" variant="default">
+                    <Badge className="indexed-badge" variant="secondary">
                       ✅ Indexed
                     </Badge>
                     <Badge className="pending-badge" variant="secondary">
