@@ -93,7 +93,7 @@ export function StatusSection({
       <p className="mt-2 mb-8">
         {providerStatuses[selectedProvider] === "success" && isConnected ? (
           <span>You connected your {getProviderInfo(selectedProvider).name} successfully.</span>
-        ) : providerStatuses[selectedProvider] === "error" || providerStatuses[selectedProvider] === "idle" ? (
+        ) : (providerStatuses[selectedProvider] === "error" || providerStatuses[selectedProvider] === "idle") && selectedProvider === 'google-drive' ? (
           <span>Send a ping to verify the {getProviderInfo(selectedProvider).name} connection</span>
         ) : null}
       </p>
