@@ -9,7 +9,15 @@ import {
   waitForIndexing 
 } from '@/lib/api/knowledge-base';
 import type { FileResource } from '@/lib/types/api';
-import type { FileSearchFilters } from '@/components/ui/file-search-bar';
+
+// Define FileSearchFilters type locally
+interface FileSearchFilters {
+  query: string;
+  sortBy: 'name' | 'date';
+  sortOrder: 'asc' | 'desc';
+  fileType: 'all' | 'files' | 'folders';
+  indexStatus: 'all' | 'indexed' | 'pending' | 'error' | 'deindexed' | 'not-indexed' | 'no-status';
+}
 
 export function useFileExplorer() {
   // Navigation state for grid view
@@ -620,8 +628,41 @@ export function useFileExplorer() {
   const toggleFileSelection = (fileId: string) => {
     setSelectedFiles(prev => {
       const next = new Set(prev);
-      if (next.has(fileId)) next.delete(fileId);
-      else next.add(fileId);
+      if (next.has(fileId)) {
+        next.delete(fileId);
+        
+        // When deselecting, also deselect parent folders if they were only selected due to children
+        Object.entries(folderContents).forEach(([folderId, subFiles]) => {
+          if (subFiles.some(subFile => subFile.resource_id === fileId)) {
+            // Check if any other children in this folder are still selected
+            const anyChildrenSelected = subFiles.some(subFile => 
+              next.has(subFile.resource_id)
+            );
+            
+            // If no children are selected, also deselect the parent folder
+            if (!anyChildrenSelected) {
+              next.delete(folderId);
+            }
+          }
+        });
+      } else {
+        next.add(fileId);
+        
+        // Auto-select parent folders when all their children are selected
+        Object.entries(folderContents).forEach(([folderId, subFiles]) => {
+          if (subFiles.some(subFile => subFile.resource_id === fileId)) {
+            // Check if all children in this folder are now selected
+            const allChildrenSelected = subFiles.every(subFile => 
+              next.has(subFile.resource_id)
+            );
+            
+            // If all children are selected, also select the parent folder
+            if (allChildrenSelected) {
+              next.add(folderId);
+            }
+          }
+        });
+      }
       return next;
     });
   };
@@ -733,8 +774,12 @@ export function useFileExplorer() {
 
   const isFolderFullySelected = useCallback((folderId: string) => {
     const subFiles = folderContents[folderId] || [];
-    const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
-    return allFolderFileIds.every(id => selectedFiles.has(id));
+    // Only check if all children are selected, not the folder itself
+    // This prevents the folder from being "fully selected" when only some children are selected
+    if (subFiles.length === 0) {
+      return selectedFiles.has(folderId);
+    }
+    return subFiles.every(subFile => selectedFiles.has(subFile.resource_id));
   }, [folderContents, selectedFiles]);
 
   const isFolderPartiallySelected = useCallback((folderId: string) => {

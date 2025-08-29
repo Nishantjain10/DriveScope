@@ -5,7 +5,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { BreadcrumbNav } from './breadcrumb-nav';
 import { LoadingBar } from './loading-bar';
 import { FileTypeIcon } from './file-type-icon';
-import { FileActions } from './file-actions';
+import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { FileResource } from '@/lib/types/api';
 
@@ -171,17 +171,17 @@ export function FileGridView({
               
               {/* Status Badge - Show for all items */}
               <div className="file-status mt-2">
-                <FileActions
-                  file={file}
-                  status={getDisplayStatus(file)}
-                  statusVariant={getStatusBadgeVariant(getDisplayStatus(file))}
-                  onIndex={handleIndex}
-                  onDeindex={handleDeindex}
-                  onRemove={handleRemove}
-                  isIndexing={indexMutation.isPending}
-                  isDeindexing={deindexMutation.isPending}
-                  isRemoving={removeFromListingMutation.isPending}
-                />
+                <Badge 
+                  variant={getStatusBadgeVariant(getDisplayStatus(file)) as "default" | "secondary" | "destructive" | "outline" | "no-border"}
+                  className="status-badge text-xs px-2 py-1 font-medium"
+                >
+                  {getDisplayStatus(file) === 'indexed' && '✅ Indexed'}
+                  {getDisplayStatus(file) === 'pending' && '⏳ Pending'}
+                  {getDisplayStatus(file) === 'error' && '❌ Error'}
+                  {getDisplayStatus(file) === 'deindexed' && '↩️ De-indexed'}
+                  {getDisplayStatus(file) === 'not-indexed' && '📄 Not Indexed'}
+                  {getDisplayStatus(file) === 'no-status' && ''}
+                </Badge>
               </div>
             </div>
           </div>
