@@ -9,6 +9,7 @@ import { FileTypeIcon } from '@/components/ui/file-type-icon';
 import { FileActions } from '@/components/ui/file-actions';
 import { DynamicFooter } from '@/components/ui/dynamic-footer';
 import { useFileExplorer } from '@/hooks/use-file-explorer';
+import type { FileResource } from '@/lib/types/api';
 import { 
   RefreshCw,
   ArrowLeft,
@@ -43,6 +44,7 @@ export default function FilesPage() {
     handleFiltersChange,
     handleRefresh,
     handleBulkIndex,
+    handleBulkRemove,
     
     // Helper functions
     getFileName,
@@ -83,39 +85,46 @@ export default function FilesPage() {
     removeFromListingMutation.mutate({ resourcePath });
   };
 
-  // Loading state - now within the existing drive wrapper
+  // Loading state - now within the same wrapper as files
   if (connectionsLoading || filesLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] checker-background relative">
-        <div className="container mx-auto px-4 py-8">
-          <div className="drive-wrapper bg-white rounded-2xl border border-[#EDEDF0] shadow-lg overflow-hidden">
-            <div className="drive-header bg-[#F8F9FA] border-b border-[#EDEDF0] px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Link href="/" className="text-[#5F6368] hover:text-[#18181B] transition-colors">
-                    <ArrowLeft className="w-5 h-5" />
-                  </Link>
-                  <h1 className="text-xl font-semibold text-[#18181B]">Google Drive</h1>
+      <div className="files-page checker-background bg-[#FAFAFB] min-h-screen p-5 relative">
+        {/* Elegant Bordered Container */}
+        <div className="max-w-6xl mx-auto mt-8">
+          <div className="rounded-lg border border-[#19191C0A] bg-[#F9F9FA] p-4 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
+            <div className="rounded-lg border border-[#FAFAFB] bg-white shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] overflow-hidden">
+              
+              {/* Google Drive-like Header */}
+              <div className="drive-header bg-white border-b border-[#EDEDF0] px-6 py-4">
+                <div className="header-content flex items-center justify-between">
+                  <div className="header-left flex items-center gap-4">
+                    <Link href="/" className="back-button text-[#5F6368] hover:text-zinc-700 transition-colors">
+                      <ArrowLeft className="w-5 h-5" />
+                    </Link>
+                    <h1 className="page-title text-xl font-normal text-[#202124]">
+                      Google Drive
+                    </h1>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="file-content flex-1 px-6 py-16">
-              <div className="loading-state flex items-center justify-center">
-                <div className="loading-content text-center max-w-md mx-auto">
-                  <div className="loading-animation mb-6">
-                    <div className="loading-dots flex justify-center gap-2">
-                      <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              
+              <div className="file-content flex-1 px-6 py-16">
+                <div className="loading-state flex items-center justify-center">
+                  <div className="loading-content text-center max-w-md mx-auto">
+                    <div className="loading-animation mb-6">
+                      <div className="loading-dots flex justify-center gap-2">
+                        <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-[#5F6368] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
                     </div>
+                    <p className="text-[#5F6368] text-sm font-medium mb-2">
+                      {connectionsLoading ? 'Connecting to Google Drive...' : 'Loading your files...'}
+                    </p>
+                    <p className="text-[#9AA0A6] text-xs">
+                      {connectionsLoading ? 'Establishing secure connection' : 'Please wait while we fetch your Drive contents'}
+                    </p>
                   </div>
-                  <p className="text-[#5F6368] text-sm font-medium mb-2">
-                    {connectionsLoading ? 'Connecting to Google Drive...' : 'Loading your files...'}
-                  </p>
-                  <p className="text-[#9AA0A6] text-xs">
-                    {connectionsLoading ? 'Establishing secure connection' : 'Please wait while we fetch your Drive contents'}
-                  </p>
                 </div>
               </div>
             </div>
@@ -493,7 +502,11 @@ export default function FilesPage() {
           selectedCount={selectedFiles.size}
           onCancel={() => setSelectedFiles(new Set())}
           onLoadSelected={handleBulkIndex}
+          onRemoveSelected={handleBulkRemove}
           isLoading={isBulkIndexing}
+          hasIndexedFiles={Array.from(selectedFiles).some(id => 
+            getDisplayStatus({ resource_id: id, inode_type: 'file' } as FileResource) === 'indexed'
+          )}
         />
     </div>
   );

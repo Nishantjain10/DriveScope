@@ -5,14 +5,18 @@ interface DynamicFooterProps {
   selectedCount: number;
   onCancel: () => void;
   onLoadSelected: () => void;
+  onRemoveSelected: () => void;
   isLoading: boolean;
+  hasIndexedFiles: boolean;
 }
 
 export function DynamicFooter({
   selectedCount,
   onCancel,
   onLoadSelected,
-  isLoading
+  onRemoveSelected,
+  isLoading,
+  hasIndexedFiles
 }: DynamicFooterProps) {
   if (selectedCount === 0) return null;
 
@@ -34,24 +38,46 @@ export function DynamicFooter({
             >
               Cancel
             </Button>
-            <Button 
-              size="sm"
-              onClick={onLoadSelected}
-              disabled={isLoading}
-              className="load-selected-files-btn bg-[#18181B] text-white hover:bg-[#27272A]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Load Selected Files
-                </>
-              )}
-            </Button>
+            {hasIndexedFiles ? (
+              <Button 
+                size="sm"
+                onClick={onRemoveSelected}
+                disabled={isLoading}
+                variant="outline"
+                className="remove-selected-files-btn border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Remove Selected
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button 
+                size="sm"
+                onClick={onLoadSelected}
+                disabled={isLoading}
+                className="load-selected-files-btn bg-[#18181B] text-white hover:bg-[#27272A]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Load Selected Files
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>

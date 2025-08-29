@@ -221,8 +221,8 @@ export function useFileExplorer() {
       setFolderContents({});
       setExpandedFolders(new Set());
       
-      // Clear file statuses to get fresh data
-      setFileStatuses({});
+      // Don't clear file statuses - keep indexed/deindexed states
+      // setFileStatuses({});
       
       // Clear selections
       setSelectedFiles(new Set());
@@ -326,6 +326,41 @@ export function useFileExplorer() {
     } catch (error) {
       toast.error('Failed to start bulk indexing process. Please try again.');
       console.error('Bulk indexing error:', error);
+    } finally {
+      setIsBulkIndexing(false);
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedFiles.size === 0) {
+      toast.error('No files selected for removal');
+      return;
+    }
+
+    // Prevent multiple clicks
+    if (isBulkIndexing) {
+      toast.error('Operation already in progress. Please wait.');
+      return;
+    }
+
+    setIsBulkIndexing(true);
+    console.log('🗑️ Starting bulk removal for:', selectedFiles.size, 'files');
+    
+    try {
+      const selectedFileIds = Array.from(selectedFiles);
+      
+      // Remove all selected files from listing
+      await Promise.all(
+        selectedFileIds.map(resourceId => 
+          removeFromListingMutation.mutateAsync({ resourcePath: resourceId })
+        )
+      );
+      
+      toast.success(`Successfully removed ${selectedFileIds.length} file${selectedFileIds.length === 1 ? '' : 's'} from listing!`);
+      setSelectedFiles(new Set());
+    } catch (error) {
+      toast.error('Failed to remove some files. Please try again.');
+      console.error('Bulk removal error:', error);
     } finally {
       setIsBulkIndexing(false);
     }
@@ -620,6 +655,7 @@ export function useFileExplorer() {
     handleFiltersChange,
     handleRefresh,
     handleBulkIndex,
+    handleBulkRemove,
     
     // Helper functions
     getFileName,
