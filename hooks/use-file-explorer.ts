@@ -531,6 +531,9 @@ export function useFileExplorer() {
       // This preserves selections during loading
       if (selectedFiles.has(folderId)) {
         const newSelectedFiles = new Set(selectedFiles);
+        // Ensure parent folder remains selected
+        newSelectedFiles.add(folderId);
+        // Add all sub-files
         directFiles.forEach(subFile => {
           newSelectedFiles.add(subFile.resource_id);
         });
@@ -577,6 +580,9 @@ export function useFileExplorer() {
           // Auto-select all sub-files if the parent folder is already selected
           if (selectedFiles.has(folderId)) {
             const newSelectedFiles = new Set(selectedFiles);
+            // Ensure parent folder remains selected
+            newSelectedFiles.add(folderId);
+            // Add all sub-files
             directFiles.forEach(subFile => {
               newSelectedFiles.add(subFile.resource_id);
             });
@@ -786,18 +792,16 @@ export function useFileExplorer() {
     
     // Count files from selected folders that haven't been loaded yet
     // This ensures we show accurate counts even before expansion
+    // Note: We don't auto-load here to avoid conflicts with selection state
     files.forEach(file => {
       if (file.inode_type === 'directory' && selectedFiles.has(file.resource_id)) {
-        // If folder is selected but contents not loaded, trigger background loading
-        if (!folderContents[file.resource_id] && !loadingFolders.has(file.resource_id)) {
-          // Start loading in background for accurate counting
-          autoLoadFolderContents(file.resource_id);
-        }
+        // Just count the folder itself if contents not loaded
+        // The actual loading will happen when needed for display
       }
     });
     
     return total;
-  }, [files, folderContents, selectedFiles, loadingFolders, autoLoadFolderContents]);
+  }, [files, folderContents, selectedFiles]);
 
   // Get visible count (files that are actually visible in the UI)
   const getVisibleSelectedCount = useCallback(() => {
