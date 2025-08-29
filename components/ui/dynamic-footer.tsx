@@ -67,7 +67,8 @@ export function DynamicFooter({
               Cancel
             </Button>
             
-            {hasIndexedFiles && onRemoveSelected && (
+            {hasIndexedFiles && onRemoveSelected ? (
+              // If files are indexed, show Remove Selected button
               <Button
                 variant="outline"
                 onClick={onRemoveSelected}
@@ -76,15 +77,16 @@ export function DynamicFooter({
               >
                 Remove Selected
               </Button>
+            ) : (
+              // If files are NOT indexed, show Load Selected Files button
+              <Button
+                onClick={onLoadSelected}
+                disabled={isLoading}
+                className="bg-[#18181B] hover:bg-[#262626] text-white"
+              >
+                {isLoading ? 'Processing...' : 'Load Selected Files'}
+              </Button>
             )}
-            
-            <Button
-              onClick={onLoadSelected}
-              disabled={isLoading}
-              className="bg-[#18181B] hover:bg-[#262626] text-white"
-            >
-              {isLoading ? 'Processing...' : 'Load Selected Files'}
-            </Button>
           </div>
         </div>
       </div>
