@@ -475,6 +475,57 @@ export function useFileExplorer() {
   // Folder functions
   const [folderContents, setFolderContents] = useState<Record<string, FileResource[]>>({});
   const [loadingFolders, setLoadingFolders] = useState<Set<string>>(new Set());
+  const [nestedFolderContents, setNestedFolderContents] = useState<Record<string, FileResource[]>>({});
+
+  // Recursive function to get all files in a folder tree
+  const getAllFilesInFolderTree = useCallback(async (folderId: string, depth: number = 0): Promise<FileResource[]> => {
+    if (depth > 5) return []; // Prevent infinite recursion
+    
+    try {
+      const response = await listFiles(connectionId!, { resource_id: folderId });
+      const files = response.data || [];
+      
+      // Get nested folder contents
+      const nestedFiles: FileResource[] = [];
+      for (const file of files) {
+        if (file.inode_type === 'directory') {
+          const nestedResponse = await getAllFilesInFolderTree(file.resource_id, depth + 1);
+          nestedFiles.push(...nestedResponse);
+        }
+      }
+      
+      return [...files, ...nestedFiles];
+    } catch (error) {
+      console.error('Failed to fetch nested folder contents:', error);
+      return [];
+    }
+  }, [connectionId]);
+
+  // Auto-load folder contents when folder is selected
+  const autoLoadFolderContents = useCallback(async (folderId: string) => {
+    if (!connectionId || folderContents[folderId]) return;
+    
+    setLoadingFolders(prev => new Set([...prev, folderId]));
+    
+    try {
+      const allFiles = await getAllFilesInFolderTree(folderId);
+      
+      setFolderContents(prev => ({
+        ...prev,
+        [folderId]: allFiles
+      }));
+      
+      console.log('🔄 Auto-loaded', allFiles.length, 'files from folder tree:', folderId);
+    } catch (error) {
+      console.error('Failed to auto-load folder contents:', error);
+    } finally {
+      setLoadingFolders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(folderId);
+        return newSet;
+      });
+    }
+  }, [connectionId, folderContents, getAllFilesInFolderTree]);
 
   const toggleFolderExpansion = async (folderId: string) => {
     if (expandedFolders.has(folderId)) {
@@ -492,22 +543,21 @@ export function useFileExplorer() {
         setLoadingFolders(prev => new Set([...prev, folderId]));
         
         try {
-          const response = await listFiles(connectionId, { resource_id: folderId });
-          const subFiles = response.data || [];
+          const allFiles = await getAllFilesInFolderTree(folderId);
           
           setFolderContents(prev => ({
             ...prev,
-            [folderId]: subFiles
+            [folderId]: allFiles
           }));
           
           // Auto-select all sub-files if the parent folder is already selected
           if (selectedFiles.has(folderId)) {
             const newSelectedFiles = new Set(selectedFiles);
-            subFiles.forEach(subFile => {
+            allFiles.forEach(subFile => {
               newSelectedFiles.add(subFile.resource_id);
             });
             setSelectedFiles(newSelectedFiles);
-            console.log('🔄 Auto-selected', subFiles.length, 'sub-files for expanded folder:', folderId);
+            console.log('🔄 Auto-selected', allFiles.length, 'sub-files for expanded folder:', folderId);
           }
         } catch (error) {
           console.error('Failed to fetch folder contents:', error);
@@ -548,7 +598,13 @@ export function useFileExplorer() {
     });
   };
 
-  const toggleFolderSelection = (folderId: string) => {
+  // Enhanced folder selection with auto-loading
+  const toggleFolderSelection = useCallback(async (folderId: string) => {
+    // Auto-load folder contents if not already loaded
+    if (!folderContents[folderId]) {
+      await autoLoadFolderContents(folderId);
+    }
+    
     const subFiles = folderContents[folderId] || [];
     const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
     
@@ -566,21 +622,22 @@ export function useFileExplorer() {
       
       return newSet;
     });
-  };
+  }, [folderContents, autoLoadFolderContents]);
 
-  const selectAllFiles = () => {
+  // Enhanced select all to include nested folder contents
+  const selectAllFiles = useCallback(async () => {
     const allFileIds = new Set<string>();
     
     // Add root files
     files.forEach(file => allFileIds.add(file.resource_id));
     
-    // Add all sub-files from expanded folders
+    // Add all sub-files from expanded folders and their nested contents
     Object.values(folderContents).forEach(subFiles => {
       subFiles.forEach(subFile => allFileIds.add(subFile.resource_id));
     });
     
     setSelectedFiles(allFileIds);
-  };
+  }, [files, folderContents]);
 
   const deselectAllFiles = () => {
     setSelectedFiles(new Set());
@@ -589,18 +646,42 @@ export function useFileExplorer() {
   const isAllSelected = selectedFiles.size === files.length && files.length > 0;
   const isIndeterminate = selectedFiles.size > 0 && selectedFiles.size < files.length;
 
-  const isFolderFullySelected = (folderId: string) => {
+  // Enhanced folder selection state checking
+  const isFolderFullySelected = useCallback((folderId: string) => {
     const subFiles = folderContents[folderId] || [];
     const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
     return allFolderFileIds.every(id => selectedFiles.has(id));
-  };
+  }, [folderContents, selectedFiles]);
 
-  const isFolderPartiallySelected = (folderId: string) => {
+  const isFolderPartiallySelected = useCallback((folderId: string) => {
     const subFiles = folderContents[folderId] || [];
     const allFolderFileIds = [folderId, ...subFiles.map(f => f.resource_id)];
     const selectedCount = allFolderFileIds.filter(id => selectedFiles.has(id)).length;
     return selectedCount > 0 && selectedCount < allFolderFileIds.length;
-  };
+  }, [folderContents, selectedFiles]);
+
+  // Get total count of all selected files including nested ones
+  const getTotalSelectedCount = useCallback(() => {
+    let total = 0;
+    
+    // Count root files
+    files.forEach(file => {
+      if (selectedFiles.has(file.resource_id)) {
+        total++;
+      }
+    });
+    
+    // Count nested files from all loaded folders
+    Object.values(folderContents).forEach(subFiles => {
+      subFiles.forEach(subFile => {
+        if (selectedFiles.has(subFile.resource_id)) {
+          total++;
+        }
+      });
+    });
+    
+    return total;
+  }, [files, folderContents, selectedFiles]);
 
   // Filter and sort files
   const filteredAndSortedFiles = files
@@ -687,6 +768,7 @@ export function useFileExplorer() {
     isFolderExpanded,
     getFilesInFolder,
     isFolderLoading,
+    autoLoadFolderContents,
     
     // Selection functions
     toggleFileSelection,
@@ -697,6 +779,7 @@ export function useFileExplorer() {
     isIndeterminate,
     isFolderFullySelected,
     isFolderPartiallySelected,
+    getTotalSelectedCount,
     
     // Actions
     setViewMode,

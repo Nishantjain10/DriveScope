@@ -1,89 +1,74 @@
-import { CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface DynamicFooterProps {
   selectedCount: number;
+  totalSelectedCount: number;
   onCancel: () => void;
   onLoadSelected: () => void;
-  onRemoveSelected: () => void;
-  isLoading: boolean;
-  hasIndexedFiles: boolean;
+  onRemoveSelected?: () => void;
+  hasIndexedFiles?: boolean;
+  isLoading?: boolean;
 }
 
 export function DynamicFooter({
   selectedCount,
+  totalSelectedCount,
   onCancel,
   onLoadSelected,
   onRemoveSelected,
-  isLoading,
-  hasIndexedFiles
+  hasIndexedFiles = false,
+  isLoading = false,
 }: DynamicFooterProps) {
-  if (selectedCount === 0) return null;
-
+  const showNestedCount = totalSelectedCount > selectedCount;
+  
   return (
-    <>
-      <div className="dynamic-footer fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDEDF0] shadow-lg z-50">
-        <div className="footer-content px-6 py-4 flex items-center justify-between">
-          <div className="footer-left">
-            <span className="text-sm text-[#5F6368]">
-              {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 shadow-lg z-50">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600">
+              {showNestedCount ? (
+                <>
+                  <span className="font-medium">{selectedCount}</span> visible,{' '}
+                  <span className="font-medium">{totalSelectedCount}</span> total selected
+                </>
+              ) : (
+                <span className="font-medium">{selectedCount}</span> selected
+              )}
             </span>
           </div>
-          <div className="footer-right flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onCancel}
-              className="cancel-selection-btn"
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            Cancel
+          </Button>
+          
+          {hasIndexedFiles && onRemoveSelected && (
+            <Button
+              variant="outline"
+              onClick={onRemoveSelected}
+              disabled={isLoading}
+              className="text-red-600 border-red-200 hover:text-red-700 hover:border-red-300"
             >
-              Cancel
+              Remove Selected
             </Button>
-            {hasIndexedFiles ? (
-              <Button 
-                size="sm"
-                onClick={onRemoveSelected}
-                disabled={isLoading}
-                variant="outline"
-                className="remove-selected-files-btn border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Remove Selected
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button 
-                size="sm"
-                onClick={onLoadSelected}
-                disabled={isLoading}
-                className="load-selected-files-btn bg-[#18181B] text-white hover:bg-[#27272A]"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Load Selected Files
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
+          )}
+          
+          <Button
+            onClick={onLoadSelected}
+            disabled={isLoading}
+            className="bg-[#18181B] hover:bg-[#262626] text-white"
+          >
+            {isLoading ? 'Processing...' : 'Load Selected Files'}
+          </Button>
         </div>
       </div>
-      
-      {/* Add bottom padding when footer is visible */}
-      <div className="h-20"></div>
-    </>
+    </div>
   );
 }

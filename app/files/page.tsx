@@ -67,6 +67,7 @@ export default function FilesPage() {
     isIndeterminate,
     isFolderFullySelected,
     isFolderPartiallySelected,
+    getTotalSelectedCount,
     
     // Actions
     setViewMode,
@@ -499,16 +500,17 @@ export default function FilesPage() {
       </div>
 
       {/* Dynamic Footer */}
-              <DynamicFooter
-          selectedCount={selectedFiles.size}
-          onCancel={() => setSelectedFiles(new Set())}
-          onLoadSelected={handleBulkIndex}
-          onRemoveSelected={handleBulkRemove}
-          isLoading={isBulkIndexing}
-          hasIndexedFiles={Array.from(selectedFiles).some(id => 
-            getDisplayStatus({ resource_id: id, inode_type: 'file' } as FileResource) === 'indexed'
-          )}
-        />
+      <DynamicFooter
+        selectedCount={selectedFiles.size}
+        totalSelectedCount={getTotalSelectedCount()}
+        onCancel={() => setSelectedFiles(new Set())}
+        onLoadSelected={handleBulkIndex}
+        onRemoveSelected={handleBulkRemove}
+        isLoading={isBulkIndexing}
+        hasIndexedFiles={Array.from(selectedFiles).some(id => 
+          getDisplayStatus({ resource_id: id, inode_type: 'file' } as FileResource) === 'indexed'
+        )}
+      />
     </div>
   );
 }
