@@ -24,6 +24,7 @@ export function useFileExplorer() {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [fileStatuses, setFileStatuses] = useState<Record<string, string>>({});
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [isBulkIndexing, setIsBulkIndexing] = useState(false);
 
   // API queries
   const { 
@@ -54,6 +55,19 @@ export function useFileExplorer() {
       setFileStatuses(initialStatuses);
     }
   }, [filesResponse?.data]);
+
+  // Auto-sync state when connection changes or page refreshes
+  useEffect(() => {
+    if (connectionId && !connectionsLoading) {
+      console.log('🔄 Auto-syncing state for connection:', connectionId);
+      // Clear any stale data
+      setFolderContents({});
+      setExpandedFolders(new Set());
+      setSelectedFiles(new Set());
+      // Refetch files to get latest state
+      refetchFiles();
+    }
+  }, [connectionId, connectionsLoading, refetchFiles]);
 
   // Mutations
   const indexMutation = useMutation({
@@ -197,11 +211,30 @@ export function useFileExplorer() {
     setSearchFilters(filters);
   }, []);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     console.log('🔄 Refresh button clicked');
     console.log('🔄 Current connectionId:', connectionId);
     console.log('🔄 Current files count:', files.length);
-    refetchFiles();
+    
+    try {
+      // Clear folder contents to force fresh fetch
+      setFolderContents({});
+      setExpandedFolders(new Set());
+      
+      // Clear file statuses to get fresh data
+      setFileStatuses({});
+      
+      // Clear selections
+      setSelectedFiles(new Set());
+      
+      // Refetch files
+      await refetchFiles();
+      
+      toast.success('Files refreshed successfully!');
+    } catch (error) {
+      console.error('Refresh error:', error);
+      toast.error('Failed to refresh files. Please try again.');
+    }
   };
 
   const handleBulkIndex = async () => {
@@ -210,6 +243,13 @@ export function useFileExplorer() {
       return;
     }
 
+    // Prevent multiple clicks
+    if (isBulkIndexing) {
+      toast.error('Bulk indexing already in progress. Please wait.');
+      return;
+    }
+
+    setIsBulkIndexing(true);
     console.log('📝 Starting bulk indexing for:', selectedFiles.size, 'files');
     
     try {
@@ -282,6 +322,8 @@ export function useFileExplorer() {
     } catch (error) {
       toast.error('Failed to start bulk indexing process. Please try again.');
       console.error('Bulk indexing error:', error);
+    } finally {
+      setIsBulkIndexing(false);
     }
   };
 
@@ -563,6 +605,7 @@ export function useFileExplorer() {
     connectionsLoading,
     filesLoading,
     connectionsError,
+    isBulkIndexing,
     
     // Mutations
     indexMutation,

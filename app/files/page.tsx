@@ -32,6 +32,7 @@ export default function FilesPage() {
     connectionsLoading,
     filesLoading,
     connectionsError,
+    isBulkIndexing,
     
     // Mutations
     indexMutation,
@@ -458,12 +459,12 @@ export default function FilesPage() {
       </div>
 
       {/* Dynamic Footer */}
-      <DynamicFooter
-        selectedCount={selectedFiles.size}
-        onCancel={() => setSelectedFiles(new Set())}
-        onLoadSelected={handleBulkIndex}
-        isLoading={indexMutation.isPending}
-      />
+              <DynamicFooter
+          selectedCount={selectedFiles.size}
+          onCancel={() => setSelectedFiles(new Set())}
+          onLoadSelected={handleBulkIndex}
+          isLoading={isBulkIndexing}
+        />
     </div>
   );
 }
