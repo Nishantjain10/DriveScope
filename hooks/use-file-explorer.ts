@@ -12,6 +12,12 @@ import type { FileResource } from '@/lib/types/api';
 import type { FileSearchFilters } from '@/components/ui/file-search-bar';
 
 export function useFileExplorer() {
+  // Navigation state for grid view
+  interface FolderNavigation {
+    id: string;
+    name: string;
+  }
+
   // State management
   const [searchFilters, setSearchFilters] = useState<FileSearchFilters>({
     query: '',
@@ -26,6 +32,11 @@ export function useFileExplorer() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [isBulkIndexing, setIsBulkIndexing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Navigation state
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [navigationStack, setNavigationStack] = useState<FolderNavigation[]>([]);
+  const [currentFolderContents, setCurrentFolderContents] = useState<FileResource[]>([]);
 
   // API queries
   const { 
@@ -44,7 +55,7 @@ export function useFileExplorer() {
   const queryClient = useQueryClient();
   const files: FileResource[] = filesResponse?.data || [];
 
-  // Initialize file statuses when API data loads
+  // Initialize file statuses and current folder contents when API data loads
   useEffect(() => {
     if (filesResponse?.data) {
       const initialStatuses: Record<string, string> = {};
@@ -54,8 +65,13 @@ export function useFileExplorer() {
         }
       });
       setFileStatuses(initialStatuses);
+      
+      // Initialize current folder contents with root files when no folder is selected
+      if (!currentFolderId) {
+        setCurrentFolderContents(filesResponse.data);
+      }
     }
-  }, [filesResponse?.data]);
+  }, [filesResponse?.data, currentFolderId]);
 
   // Auto sync state when connection changes or page refreshes
   useEffect(() => {
@@ -186,10 +202,21 @@ export function useFileExplorer() {
     console.log('Refresh button clicked');
     setIsRefreshing(true);
     try {
+      // Reset all state
       setFolderContents({});
       setExpandedFolders(new Set());
       setSelectedFiles(new Set());
+      setCurrentFolderId(null);
+      setNavigationStack([]);
+      
+      // Refetch files
       await refetchFiles();
+      
+      // Reset current folder contents to root
+      if (filesResponse?.data) {
+        setCurrentFolderContents(filesResponse.data);
+      }
+      
       toast.success('Files refreshed successfully!');
     } catch (error) {
       console.error('Refresh error:', error);
@@ -419,6 +446,76 @@ export function useFileExplorer() {
       return [];
     }
   }, [connectionId]);
+
+  // Navigation functions for grid view
+  const navigateToFolder = useCallback(async (folderId: string, folderName: string) => {
+    setLoadingFolders(prev => new Set([...prev, folderId]));
+    
+    try {
+      const contents = await getDirectFolderContents(folderId);
+      setCurrentFolderContents(contents);
+      setCurrentFolderId(folderId);
+      setNavigationStack(prev => [...prev, { id: folderId, name: folderName }]);
+      
+      // Also update folder contents for list view
+      setFolderContents(prev => ({
+        ...prev,
+        [folderId]: contents
+      }));
+    } catch (error) {
+      console.error('Failed to navigate to folder:', error);
+      toast.error('Failed to open folder');
+    } finally {
+      setLoadingFolders(prev => {
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
+      });
+    }
+  }, [getDirectFolderContents]);
+
+  const navigateBack = useCallback(() => {
+    // Always remove the last item from the stack
+    const newStack = navigationStack.slice(0, -1);
+    setNavigationStack(newStack);
+
+    if (newStack.length === 0) {
+      // Back to root
+      setCurrentFolderId(null);
+      setCurrentFolderContents(files);
+    } else {
+      // Go to parent folder
+      const parentFolder = newStack[newStack.length - 1];
+      setCurrentFolderId(parentFolder.id);
+      // Use cached contents if available, otherwise load them
+      if (folderContents[parentFolder.id]) {
+        setCurrentFolderContents(folderContents[parentFolder.id]);
+      } else {
+        // Load parent folder contents
+        setLoadingFolders(prev => new Set([...prev, parentFolder.id]));
+        getDirectFolderContents(parentFolder.id).then(contents => {
+          setFolderContents(prev => ({
+            ...prev,
+            [parentFolder.id]: contents
+          }));
+          setCurrentFolderContents(contents);
+          setLoadingFolders(prev => {
+            const next = new Set(prev);
+            next.delete(parentFolder.id);
+            return next;
+          });
+        });
+      }
+    }
+  }, [navigationStack, files, folderContents, getDirectFolderContents]);
+
+  // Get current breadcrumb path
+  const getCurrentPath = useCallback(() => {
+    return navigationStack.map(folder => ({
+      id: folder.id,
+      name: folder.name,
+    }));
+  }, [navigationStack]);
 
   // Recursive count helper if you ever need totals
   const getAllFilesInFolderTree = useCallback(async (folderId: string, depth: number = 0): Promise<FileResource[]> => {
@@ -732,6 +829,11 @@ export function useFileExplorer() {
     files,
     filteredAndSortedFiles,
     
+    // Navigation state
+    currentFolderId,
+    currentFolderContents,
+    navigationStack,
+    
     // Loading states
     connectionsLoading,
     filesLoading,
@@ -763,6 +865,11 @@ export function useFileExplorer() {
     getFilesInFolder,
     isFolderLoading,
     autoLoadFolderContents,
+    
+    // Navigation functions
+    navigateToFolder,
+    navigateBack,
+    getCurrentPath,
     
     // Selection functions
     toggleFileSelection,
