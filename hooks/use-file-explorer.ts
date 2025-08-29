@@ -613,8 +613,8 @@ export function useFileExplorer() {
 
   // Enhanced folder selection with auto-loading - made synchronous to prevent lag
   const toggleFolderSelection = useCallback((folderId: string) => {
-    // Start auto-loading in background if not already loaded
-    if (!folderContents[folderId]) {
+    // Start auto-loading in background if not already loaded for accurate counting
+    if (!folderContents[folderId] && !loadingFolders.has(folderId)) {
       autoLoadFolderContents(folderId);
     }
     
@@ -635,7 +635,7 @@ export function useFileExplorer() {
       
       return newSet;
     });
-  }, [folderContents, autoLoadFolderContents]);
+  }, [folderContents, loadingFolders, autoLoadFolderContents]);
 
   // Enhanced select all to include nested folder contents
   const selectAllFiles = useCallback(() => {
@@ -650,6 +650,11 @@ export function useFileExplorer() {
       if (!isInSubfolder) {
         allFileIds.add(file.resource_id);
       }
+      
+      // If it's a folder, trigger background loading for accurate counting
+      if (file.inode_type === 'directory' && !folderContents[file.resource_id] && !loadingFolders.has(file.resource_id)) {
+        autoLoadFolderContents(file.resource_id);
+      }
     });
     
     // Add all sub-files from expanded folders and their nested contents
@@ -658,7 +663,7 @@ export function useFileExplorer() {
     });
     
     setSelectedFiles(allFileIds);
-  }, [files, folderContents]);
+  }, [files, folderContents, loadingFolders, autoLoadFolderContents]);
 
   const deselectAllFiles = () => {
     setSelectedFiles(new Set());
@@ -731,8 +736,20 @@ export function useFileExplorer() {
       });
     });
     
+    // Count files from selected folders that haven't been loaded yet
+    // This ensures we show accurate counts even before expansion
+    files.forEach(file => {
+      if (file.inode_type === 'directory' && selectedFiles.has(file.resource_id)) {
+        // If folder is selected but contents not loaded, trigger background loading
+        if (!folderContents[file.resource_id] && !loadingFolders.has(file.resource_id)) {
+          // Start loading in background for accurate counting
+          autoLoadFolderContents(file.resource_id);
+        }
+      }
+    });
+    
     return total;
-  }, [files, folderContents, selectedFiles]);
+  }, [files, folderContents, selectedFiles, loadingFolders, autoLoadFolderContents]);
 
   // Get visible count (files that are actually visible in the UI)
   const getVisibleSelectedCount = useCallback(() => {
