@@ -60,7 +60,7 @@ const DockItem: FC<DockItemProps> = ({
   baseItemSize,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isHovered = useMotionValue(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   const mouseDistance = useTransform(mouseX, (val) => {
     const rect = ref.current?.getBoundingClientRect() ?? { x: 0, width: baseItemSize }; 
@@ -79,10 +79,10 @@ const DockItem: FC<DockItemProps> = ({
     <motion.div
       ref={ref}
       style={{ width: size, height: size }}
-      onHoverStart={() => isHovered.set(1)}
-      onHoverEnd={() => isHovered.set(0)}
-      onFocus={() => isHovered.set(1)} 
-      onBlur={() => isHovered.set(0)}  
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)} 
+      onBlur={() => setIsHovered(false)}  
       onClick={onClick}
       className={`relative inline-flex items-center justify-center rounded-[25%] 
                   bg-white border border-[#FAFAFB] shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)]
@@ -92,7 +92,7 @@ const DockItem: FC<DockItemProps> = ({
       role="button"
     >
       {Children.map(children, (child) =>
-        cloneElement(child as React.ReactElement<{ isHovered?: MotionValue<number> }>, { isHovered })
+        cloneElement(child as React.ReactElement<{ isHovered?: boolean }>, { isHovered })
       )}
     </motion.div>
   );
@@ -104,20 +104,11 @@ type DockLabelProps = {
 };
 
 const DockLabel: FC<DockLabelProps> = ({ children, className = "", ...rest }) => {
-  const { isHovered } = rest as { isHovered?: MotionValue<number> }; 
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isHovered) return; 
-    const unsubscribe = isHovered.on("change", (latest) => {
-      setIsVisible(latest === 1);
-    });
-    return () => unsubscribe();
-  }, [isHovered]);
+  const { isHovered } = rest as { isHovered?: boolean }; 
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isHovered && (
         <motion.div
           initial={{ opacity: 0, y: 5 }} 
           animate={{ opacity: 1, y: -10 }}
@@ -172,13 +163,12 @@ export const Dock: FC<DockProps> = ({
   const animatedHeight = useSpring(heightRow, spring);
 
   return (
-    <div className="w-full overflow-hidden">
-      <motion.div
-        style={{ height: animatedHeight }} 
-        className={`flex justify-center items-end w-full overflow-hidden ${panelWrapperClassName}`}
-        onHoverStart={() => isPanelHovered.set(1)}
-        onHoverEnd={() => isPanelHovered.set(0)}
-      >
+    <motion.div
+      style={{ height: animatedHeight }} 
+      className={`flex justify-center items-end w-full ${panelWrapperClassName}`}
+      onHoverStart={() => isPanelHovered.set(1)}
+      onHoverEnd={() => isPanelHovered.set(0)}
+    >
       <motion.div
         onMouseMove={({ pageX }) => mouseX.set(pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}
@@ -208,8 +198,7 @@ export const Dock: FC<DockProps> = ({
             <DockLabel>{item.label}</DockLabel>
           </DockItem>
         ))}
-              </motion.div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
