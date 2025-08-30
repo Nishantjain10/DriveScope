@@ -16,7 +16,8 @@ export function useFileNavigation(
   setFolderContents: (updater: (prev: Record<string, FileResource[]>) => Record<string, FileResource[]>) => void,
   setLoadingFolders: (updater: (prev: Set<string>) => Set<string>) => void,
   folderContents: Record<string, FileResource[]>,
-  loadingFolders: Set<string>
+  loadingFolders: Set<string>,
+  setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void
 ) {
   // Get direct folder contents
   const getDirectFolderContents = useCallback(async (folderId: string): Promise<FileResource[]> => {
@@ -153,11 +154,20 @@ export function useFileNavigation(
 
   // Toggle folder expansion
   const toggleFolderExpansion = useCallback(async (folderId: string, setSelectedFiles: (updater: (prev: Set<string>) => Set<string>) => void) => {
-    if (folderContents[folderId]) {
-      // Folder is already loaded, just toggle expansion
+    // Check if folder is currently expanded
+    const isCurrentlyExpanded = folderContents[folderId] && folderContents[folderId].length > 0;
+    
+    if (isCurrentlyExpanded) {
+      // Folder is expanded, collapse it by removing from expandedFolders
+      setExpandedFolders(prev => {
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
+      });
       return;
     }
 
+    // Folder is collapsed, expand it by loading contents and adding to expandedFolders
     setLoadingFolders(prev => new Set([...prev, folderId]));
     try {
       const directFiles = await getDirectFolderContents(folderId);
@@ -165,6 +175,9 @@ export function useFileNavigation(
         ...prev,
         [folderId]: directFiles
       }));
+
+      // Add to expandedFolders
+      setExpandedFolders(prev => new Set([...prev, folderId]));
 
       setSelectedFiles(prev => {
         if (!prev.has(folderId)) return prev;
@@ -181,7 +194,7 @@ export function useFileNavigation(
         return next;
       });
     }
-  }, [folderContents, getDirectFolderContents, setFolderContents, setLoadingFolders]);
+  }, [folderContents, getDirectFolderContents, setFolderContents, setLoadingFolders, setExpandedFolders]);
 
   // Check if folder is expanded
   const isFolderExpanded = useCallback((folderId: string, expandedFolders: Set<string>) => {
