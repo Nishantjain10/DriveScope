@@ -1,6 +1,6 @@
-# 🚀 DriveScope - Custom Google Drive File Picker with AI Indexing
+# 🚀 DriveScope - File Management System
 
-> **A modern, intelligent file management system that seamlessly integrates Google Drive with AI-powered indexing capabilities. Built with Next.js, TypeScript, and cutting-edge web technologies.**
+> **A modern file management system built with Next.js, TypeScript, and TanStack Query. Features file exploration, navigation, and integration with cloud storage providers.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
@@ -26,27 +26,27 @@
 ## ✨ Features
 
 ### 🔐 **Authentication & Security**
-- **Google Drive Integration**: Seamless OAuth2 authentication
-- **Secure API Communication**: Encrypted data transmission
-- **Session Management**: Persistent user sessions with automatic refresh
+- **Supabase Integration**: Secure authentication with Supabase
+- **API Key Management**: Server-side API key handling
+- **Session Management**: User session handling with tokens
 
 ### 📁 **File Management**
-- **Intelligent File Explorer**: Google Drive-style interface with modern UX
-- **Folder Navigation**: Deep folder exploration with lazy loading
-- **File Type Recognition**: Automatic icon detection for 50+ file formats
+- **File Explorer Interface**: Modern file browser with grid and list views
+- **Folder Navigation**: Deep folder exploration with breadcrumb navigation
+- **File Type Recognition**: Automatic icon detection for different file types
 - **Bulk Operations**: Select multiple files for batch processing
+- **File Status Tracking**: Monitor indexing and processing status
 
-### 🤖 **AI-Powered Indexing**
-- **Smart Indexing**: AI-driven content analysis and categorization
-- **Real-time Status**: Live updates on indexing progress
-- **Batch Processing**: Efficient bulk indexing with progress tracking
-- **Error Handling**: Robust error recovery and user feedback
-
-### 🎯 **Advanced Features**
-- **Search & Filter**: Powerful file search with multiple filter options
-- **Sorting**: Flexible sorting by name, date, size, and status
+### 🔍 **Search & Organization**
+- **Advanced Search**: File search with multiple filter options
+- **Sorting Capabilities**: Sort by name, date, size, and status
+- **View Modes**: Toggle between grid and list views
 - **Responsive Design**: Mobile-first approach with cross-device compatibility
-- **Dark/Light Themes**: Customizable visual preferences
+
+### 🎯 **Cloud Storage Integration**
+- **Multi-Provider Support**: Google Drive, OneDrive, Dropbox
+- **Connection Management**: Manage multiple cloud storage connections
+- **File Synchronization**: Keep local and cloud files in sync
 
 ## 🚀 Quick Start
 
@@ -54,7 +54,8 @@
 
 - **Node.js** 18.17 or later
 - **npm** 9.0 or later
-- **Google Cloud Console** account for API credentials
+- **Supabase** account for authentication
+- **Stack AI** account for API access
 
 ### Installation
 
@@ -75,20 +76,11 @@ cp .env.example .env.local
 ```bash
 # .env.local
 # CLIENT-SIDE VARIABLES (Public - exposed to browser)
-NEXT_PUBLIC_APP_NAME=DriveScope
-NEXT_PUBLIC_APP_VERSION=1.0.0
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_SUPPORT_EMAIL=support@drivescope.dev
-
-# SERVER-SIDE VARIABLES (Secure - never exposed to browser)
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
-STACK_AI_API_URL=https://api.stack-ai.com
-STACK_AI_API_KEY=your_stack_ai_api_key
-STACK_AI_ORG_ID=your_organization_id
-SUPABASE_AUTH_URL=https://sb.stack-ai.com
-SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_STACK_AI_API_URL=https://api.stack-ai.com
+NEXT_PUBLIC_SUPABASE_AUTH_URL=https://sb.stack-ai.com
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_STACK_AI_EMAIL=your_stack_ai_email
+NEXT_PUBLIC_STACK_AI_PASSWORD=your_stack_ai_password
 ```
 
 **🔒 Security Note**: Only variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. All sensitive data (API keys, secrets) are kept server-side and accessed through secure API routes.
@@ -103,26 +95,11 @@ npm run dev
 npm run build
 npm start
 
-# Linting and type checking
+# Linting
 npm run lint
-npm run type-check
 ```
 
 **🌐 Open [http://localhost:3000](http://localhost:3000) in your browser**
-
-## 🔒 Security & Configuration
-
-### **Environment Variable Security**
-- **Client-Side Variables**: Only public, non-sensitive data with `NEXT_PUBLIC_` prefix
-- **Server-Side Variables**: All sensitive data (API keys, secrets) kept secure
-- **API Routes**: Sensitive configuration accessed through secure server endpoints
-- **No Exposure**: API keys and secrets never bundled into client-side code
-
-### **Security Features**
-- **OAuth2 Authentication**: Secure Google Drive integration
-- **API Key Protection**: Server-side API key management
-- **Environment Validation**: Runtime configuration validation
-- **Error Handling**: Secure error messages without data leakage
 
 ## 🛠️ Tech Stack
 
@@ -133,18 +110,19 @@ npm run type-check
 
 ### **Styling & UI**
 - **[Tailwind CSS 4.0](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[Shadcn/ui](https://ui.shadcn.com/)** - Beautiful, accessible component library
-- **[Framer Motion](https://www.framer.com/motion/)** - Smooth animations and transitions
+- **[Radix UI](https://www.radix-ui.com/)** - Accessible component primitives
+- **[Lucide React](https://lucide.dev/)** - Beautiful icon library
+- **[Framer Motion](https://www.framer.com/motion/)** - Smooth animations
 
 ### **State Management & Data Fetching**
 - **[TanStack Query 5.0](https://tanstack.com/query)** - Powerful data synchronization
-- **[React Hook Form](https://react-hook-form.com/)** - Performant forms with validation
-- **[Zod](https://zod.dev/)** - TypeScript-first schema validation
+- **[React Hooks](https://reactjs.org/docs/hooks-intro.html)** - Custom hooks for state management
+- **[Class Variance Authority](https://cva.style/)** - Component variant management
 
 ### **Development Tools**
 - **[ESLint](https://eslint.org/)** - Code quality and consistency
-- **[Prettier](https://prettier.io/)** - Code formatting
-- **[Husky](https://typicode.github.io/husky/)** - Git hooks for quality assurance
+- **[PostCSS](https://postcss.org/)** - CSS processing
+- **[TypeScript](https://www.typescriptlang.org/)** - Type checking
 
 ## 🏗️ Architecture
 
@@ -179,45 +157,84 @@ npm run type-check
 drivescope/
 ├── 📁 app/                          # Next.js App Router
 │   ├── 📁 api/                      # API routes
+│   │   └── 📁 auth/                 # Authentication endpoints
+│   │       └── 📄 route.ts          # Auth proxy to Supabase
 │   ├── 📁 files/                    # File explorer page
+│   │   └── 📄 page.tsx              # Main file management interface
 │   ├── 📁 test/                     # Component testing page
-│   ├── 📄 layout.tsx                # Root layout
-│   ├── 📄 page.tsx                  # Homepage
+│   ├── 📄 layout.tsx                # Root layout with providers
+│   ├── 📄 page.tsx                  # Homepage with provider selection
+│   ├── 📄 app.css                   # Application styles
 │   └── 📄 globals.css               # Global styles
 ├── 📁 components/                   # Reusable UI components
-│   ├── 📁 ui/                       # Shadcn/ui components
-│   │   ├── 📄 button.tsx            # Button component
-│   │   ├── 📄 table.tsx             # Table component
-│   │   ├── 📄 input.tsx             # Input component
+│   ├── 📁 ui/                       # Core UI components
+│   │   ├── 📄 button.tsx            # Button component with variants
+│   │   ├── 📄 table.tsx             # Data table component
+│   │   ├── 📄 input.tsx             # Input field component
 │   │   ├── 📄 badge.tsx             # Status badge component
+│   │   ├── 📄 dialog.tsx            # Modal dialog component
+│   │   ├── 📄 dropdown-menu.tsx     # Dropdown menu component
+│   │   ├── 📄 switch.tsx            # Toggle switch component
+│   │   ├── 📄 card.tsx              # Card container component
+│   │   ├── 📄 alert.tsx             # Alert/notification component
+│   │   ├── 📄 loading-bar.tsx       # Loading progress indicator
+│   │   ├── 📄 navigation.tsx        # Navigation component
+│   │   ├── 📄 breadcrumb-nav.tsx    # Breadcrumb navigation
+│   │   ├── 📄 dock.tsx              # Provider selection dock
+│   │   ├── 📄 provider-dock.tsx     # Cloud provider dock
+│   │   ├── 📄 hero-section.tsx      # Hero section component
+│   │   ├── 📄 status-section.tsx    # Status display section
+│   │   ├── 📄 connection-logs.tsx   # Connection activity logs
+│   │   ├── 📄 connection-status.tsx # Connection status display
 │   │   ├── 📄 file-actions.tsx      # File action buttons
-│   │   ├── 📄 file-search-bar.tsx   # Search and filter bar
-│   │   ├── 📄 file-type-icon.tsx    # File type icons
-│   │   ├── 📄 dynamic-footer.tsx    # Selection footer
-│   │   └── 📄 file-explorer-header.tsx # Explorer header
+│   │   ├── 📄 file-explorer-header.tsx # File explorer header
+│   │   ├── 📄 file-search-bar.tsx   # Search and filter interface
+│   │   ├── 📄 file-type-icon.tsx    # File type icon display
+│   │   ├── 📄 file-grid-view.tsx    # Grid view for files
+│   │   ├── 📄 file-list-view.tsx    # List view for files
+│   │   ├── 📄 file-skeleton.tsx     # Loading skeleton for files
+│   │   └── 📄 dynamic-footer.tsx    # Dynamic selection footer
 │   └── 📄 index.ts                  # Component exports
 ├── 📁 hooks/                        # Custom React hooks
-│   ├── 📄 use-file-explorer.ts      # Main file explorer logic
-│   ├── 📄 use-files.ts              # File data management
-│   └── 📄 use-connections.ts        # Connection management
+│   ├── 📄 use-file-explorer.ts      # Main file explorer logic (legacy)
+│   ├── 📄 use-file-explorer-refactored.ts # Refactored main hook
+│   ├── 📄 use-files.ts              # File data management with TanStack Query
+│   ├── 📄 use-file-state.ts         # File state management
+│   ├── 📄 use-navigation-state.ts   # Navigation state management
+│   ├── 📄 use-file-operations.ts    # File operations (index, deindex, remove)
+│   ├── 📄 use-file-selection.ts     # File selection logic
+│   ├── 📄 use-file-navigation.ts    # File navigation and folder management
+│   ├── 📄 use-file-utils.ts         # File utility functions
+│   ├── 📄 use-file-filters.ts       # File filtering and sorting
+│   ├── 📄 use-folder-expansion.ts   # Folder expansion management
+│   └── 📄 use-file-explorer-refactored.test.ts # Hook testing
 ├── 📁 lib/                          # Utility libraries
 │   ├── 📁 api/                      # API client and functions
 │   │   ├── 📄 files.ts              # File operations API
-│   │   ├── 📄 knowledge-base.ts     # Knowledge base API
-│   │   └── 📄 stack-ai-client.ts    # Stack AI client
+│   │   ├── 📄 knowledge-base.ts     # Knowledge base API operations
+│   │   └── 📄 stack-ai-client.ts    # Stack AI API client
 │   ├── 📁 types/                    # TypeScript type definitions
-│   │   └── 📄 api.ts                # API response types
-│   ├── 📁 utils/                    # Utility functions
-│   └── 📄 config.ts                 # Configuration constants
+│   │   └── 📄 api.ts                # API response and request types
+│   ├── 📄 query-client.ts           # TanStack Query client configuration
+│   └── 📄 utils.ts                  # Utility functions
 ├── 📁 public/                       # Static assets
-├── 📁 stack-ai-home-task/           # Task documentation
-├── 📄 .env.example                  # Environment variables template
+│   ├── 📄 drive.svg                 # Google Drive icon
+│   ├── 📄 dropbox-icon.svg          # Dropbox icon
+│   ├── 📄 ms-onedrive.svg           # OneDrive icon
+│   ├── 📄 file.svg                  # File icon
+│   ├── 📄 folder.svg                # Folder icon
+│   ├── 📄 globe.svg                 # Globe icon
+│   ├── 📄 stackai.svg               # Stack AI icon
+│   └── 📄 vercel.svg                # Vercel icon
 ├── 📄 .eslintrc.json                # ESLint configuration
 ├── 📄 .gitignore                    # Git ignore rules
 ├── 📄 next.config.ts                # Next.js configuration
 ├── 📄 package.json                  # Dependencies and scripts
+├── 📄 postcss.config.mjs            # PostCSS configuration
 ├── 📄 tailwind.config.ts            # Tailwind CSS configuration
 ├── 📄 tsconfig.json                 # TypeScript configuration
+├── 📄 components.json               # Shadcn/ui components configuration
+├── 📄 ENVIRONMENT_SETUP.md          # Environment setup guide
 └── 📄 README.md                     # This file
 ```
 
@@ -227,9 +244,9 @@ drivescope/
 
 #### **TypeScript Best Practices**
 - Strict type checking enabled
-- No `any` types allowed
-- Proper interface definitions
+- Proper interface definitions for all API responses
 - Generic type usage where appropriate
+- No `any` types allowed
 
 #### **React Best Practices**
 - Functional components with hooks
@@ -238,7 +255,7 @@ drivescope/
 - Clean component composition
 
 #### **CSS Architecture**
-- Utility-first approach with Tailwind
+- Utility-first approach with Tailwind CSS
 - Custom CSS classes for complex components
 - Consistent spacing and color system
 - Responsive design patterns
@@ -252,7 +269,6 @@ git checkout -b feature/amazing-feature
 # 2. Make changes and test
 npm run dev
 npm run lint
-npm run type-check
 
 # 3. Commit with conventional commits
 git commit -m "feat: add amazing new feature"
@@ -274,10 +290,20 @@ git push origin feature/amazing-feature
 
 ### **Core Endpoints**
 
+#### **Authentication**
+```typescript
+// Authenticate with Supabase
+POST /api/auth
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
 #### **File Operations**
 ```typescript
-// List files in a folder
-GET /api/files?folderId={id}
+// List files in a connection
+GET /api/files?connectionId={id}&params={searchParams}
 
 // Index a file
 POST /api/files/index
@@ -315,7 +341,7 @@ GET /api/knowledge-bases/{kb_id}/resources/children
 ```typescript
 interface ApiError {
   message: string;
-  code: string;
+  status: number;
   details?: Record<string, any>;
 }
 
@@ -338,12 +364,19 @@ interface ApiError {
 - **Input**: Search inputs with validation
 - **Badge**: Status indicators with color coding
 - **Dialog**: Modal dialogs for confirmations
+- **Switch**: Toggle switches for settings
+- **Card**: Container components for content
+- **Alert**: Notification and alert components
 
 #### **Custom Components**
-- **FileTypeIcon**: Intelligent file type detection
+- **FileTypeIcon**: File type detection and icon display
 - **FileActions**: Context-aware action buttons
 - **DynamicFooter**: Smart selection footer
-- **FileSearchBar**: Advanced search and filtering
+- **FileSearchBar**: Advanced search and filtering interface
+- **FileGridView**: Grid layout for file display
+- **FileListView**: List layout for file display
+- **BreadcrumbNav**: Navigation breadcrumbs
+- **ProviderDock**: Cloud provider selection interface
 
 ### **Design System**
 
@@ -392,37 +425,21 @@ interface ApiError {
 ## 🧪 Testing
 
 ### **Testing Strategy**
-- **Unit Tests**: Component and hook testing
+- **Unit Tests**: Component and hook testing with Jest
 - **Integration Tests**: API endpoint testing
-- **E2E Tests**: User workflow testing
-- **Visual Regression**: UI consistency testing
+- **Component Tests**: UI component behavior testing
 
 ### **Running Tests**
 ```bash
 # Unit tests
 npm run test
 
-# E2E tests
-npm run test:e2e
-
-# Coverage report
+# Test coverage
 npm run test:coverage
-
-# Visual regression
-npm run test:visual
 ```
 
 ### **Test Examples**
 ```typescript
-// Component test
-describe('FileTypeIcon', () => {
-  it('renders folder icon for directories', () => {
-    const file = { inode_type: 'directory' };
-    render(<FileTypeIcon file={file} />);
-    expect(screen.getByTestId('folder-icon')).toBeInTheDocument();
-  });
-});
-
 // Hook test
 describe('useFileExplorer', () => {
   it('manages file selection state', () => {
@@ -452,9 +469,9 @@ vercel --prod
 ### **Environment Variables for Production**
 ```bash
 # Required for production
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_production_client_id
-GOOGLE_CLIENT_SECRET=your_production_client_secret
-NEXT_PUBLIC_API_BASE_URL=https://api.stack-ai.com
+NEXT_PUBLIC_STACK_AI_API_URL=https://api.stack-ai.com
+NEXT_PUBLIC_SUPABASE_AUTH_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_anon_key
 STACK_AI_API_KEY=your_production_api_key
 STACK_AI_ORG_ID=your_production_org_id
 
@@ -465,21 +482,12 @@ NEXT_TELEMETRY_DISABLED=1
 
 ### **Build Optimization**
 ```bash
-# Analyze bundle size
-npm run build:analyze
+# Production build
+npm run build
 
-# Generate static export
-npm run export
-
-# Performance monitoring
-npm run lighthouse
+# Start production server
+npm start
 ```
-
-### **Monitoring & Analytics**
-- **Performance**: Core Web Vitals monitoring
-- **Errors**: Error tracking and reporting
-- **Analytics**: User behavior insights
-- **Uptime**: Service availability monitoring
 
 ## 🤝 Contributing
 
@@ -516,44 +524,8 @@ npm run lighthouse
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-### **License Terms**
-- ✅ **Commercial Use**: Allowed
-- ✅ **Modification**: Allowed
-- ✅ **Distribution**: Allowed
-- ✅ **Private Use**: Allowed
-- ❌ **Liability**: Limited
-- ❌ **Warranty**: None
-
----
-
-## 🙏 Acknowledgments
-
-- **Google Drive API** for file management capabilities
-- **Stack AI** for AI-powered indexing infrastructure
-- **Next.js Team** for the amazing React framework
-- **Tailwind CSS** for the utility-first CSS approach
-- **Shadcn/ui** for beautiful, accessible components
-
-## 📞 Support
-
-- **Documentation**: [docs.drivescope.dev](https://docs.drivescope.dev)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/drivescope/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/drivescope/discussions)
-- **Email**: support@drivescope.dev
-
 ---
 
 <div align="center">
-  <p>Made with ❤️ by the DriveScope Team</p>
-  <p>
-    <a href="https://github.com/yourusername/drivescope/stargazers">
-      <img src="https://img.shields.io/github/stars/yourusername/drivescope?style=social" alt="Stars">
-    </a>
-    <a href="https://github.com/yourusername/drivescope/forks">
-      <img src="https://img.shields.io/github/forks/yourusername/drivescope?style=social" alt="Forks">
-    </a>
-    <a href="https://github.com/yourusername/drivescope/issues">
-      <img src="https://img.shields.io/github/issues/yourusername/drivescope" alt="Issues">
-    </a>
-  </p>
+  <p>Made with ❤️ by Nishant</p>
 </div>
