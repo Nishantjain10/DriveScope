@@ -41,9 +41,7 @@ class StackAIClient {
 
       console.log('🔐 Authentication Request:', {
         url: requestUrl,
-        email: requestBody.email,
         anon_key_length: this.anonKey.length,
-        body: requestBody,
       });
 
       // Use the exact same format as the Python requests library
