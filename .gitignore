@@ -41,3 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 stack-ai-home-task
+.cursorignore
+settings.json
+REFACTORING_DOCUMENTATION.md
+REFACTORING_SUMMARY.md
