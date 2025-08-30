@@ -34,6 +34,11 @@ export function ProviderDock({
       className: selectedProvider === 'google-drive' ? 'border-[#202124] border-2 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.1)]' : '',
     },
     {
+      icon: <FolderOpen className="w-7 h-7 text-neutral-600 dark:text-neutral-400" />,
+      label: 'Browse Files',
+      onClick: onNavigateToFiles,
+    },
+    {
       icon: (
         <Image
           src="/ms-onedrive.svg"
@@ -43,9 +48,9 @@ export function ProviderDock({
           className="rounded-sm"
         />
       ),
-      label: 'OneDrive',
-      onClick: () => onProviderSelect('onedrive'),
-      className: selectedProvider === 'onedrive' ? 'border-[#202124] border-2 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.1)]' : '',
+      label: 'OneDrive (Not Available)',
+      onClick: () => {}, // Disabled
+      className: 'opacity-50 cursor-not-allowed bg-neutral-200 hover:bg-neutral-200',
     },
     {
       icon: (
@@ -57,14 +62,9 @@ export function ProviderDock({
           className="rounded-sm"
         />
       ),
-      label: 'Dropbox',
-      onClick: () => onProviderSelect('dropbox'),
-      className: selectedProvider === 'dropbox' ? 'border-[#202124] border-2 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.1)]' : '',
-    },
-    {
-      icon: <FolderOpen className="w-7 h-7 text-neutral-600 dark:text-neutral-400" />,
-      label: 'Browse Files',
-      onClick: onNavigateToFiles,
+      label: 'Dropbox (Not Available)',
+      onClick: () => {}, // Disabled
+      className: 'opacity-50 cursor-not-allowed bg-neutral-200 hover:bg-neutral-200',
     },
   ];
 

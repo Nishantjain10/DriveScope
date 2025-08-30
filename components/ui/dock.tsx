@@ -172,12 +172,13 @@ export const Dock: FC<DockProps> = ({
   const animatedHeight = useSpring(heightRow, spring);
 
   return (
-    <motion.div
-      style={{ height: animatedHeight }} 
-      className={`flex justify-center items-end w-full ${panelWrapperClassName}`}
-      onHoverStart={() => isPanelHovered.set(1)}
-      onHoverEnd={() => isPanelHovered.set(0)}
-    >
+    <div className="w-full overflow-hidden">
+      <motion.div
+        style={{ height: animatedHeight }} 
+        className={`flex justify-center items-end w-full overflow-hidden ${panelWrapperClassName}`}
+        onHoverStart={() => isPanelHovered.set(1)}
+        onHoverEnd={() => isPanelHovered.set(0)}
+      >
       <motion.div
         onMouseMove={({ pageX }) => mouseX.set(pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}
@@ -207,7 +208,8 @@ export const Dock: FC<DockProps> = ({
             <DockLabel>{item.label}</DockLabel>
           </DockItem>
         ))}
+              </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
