@@ -117,7 +117,7 @@ export function FileListView({
                     <span className="file-icon">
                       <FileTypeIcon file={file} />
                     </span>
-                    <div className="file-details flex items-center gap-2">
+                    <div className="file-details flex items-center gap-1">
                       <p className="file-name text-[#202124] text-sm">
                         {getFileName(file)}
                       </p>
@@ -128,12 +128,12 @@ export function FileListView({
                             e.stopPropagation();
                             toggleFolderExpansion(file.resource_id);
                           }}
-                          className="folder-toggle-btn hover:bg-zinc-100 rounded transition-colors p-1"
+                          className="folder-toggle-btn hover:bg-zinc-100 rounded transition-colors"
                         >
                           {expandedFolders.has(file.resource_id) ? (
-                            <ChevronDown className="w-4 h-4 text-zinc-500" />
+                            <ChevronDown className="w-3.5 h-3.5 text-neutral-800 border-neutral-500 rounded-lg" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-zinc-500" />
+                            <ChevronRight className="w-3.5 h-3.5 text-neutral-700 border-neutral-500 rounded-lg" />
                           )}
                         </button>
                       )}
@@ -219,9 +219,9 @@ export function FileListView({
                                   className="folder-toggle-btn hover:bg-zinc-100 rounded transition-colors p-1"
                                 >
                                   {expandedFolders.has(subFile.resource_id) ? (
-                                    <ChevronDown className="w-4 h-4 text-zinc-500" />
+                                    <ChevronDown className="w-4 h-4 text-neutral-400" />
                                   ) : (
-                                    <ChevronRight className="w-4 h-4 text-zinc-500" />
+                                    <ChevronRight className="w-4 h-4 text-neutral-400" />
                                   )}
                                 </button>
                               )}
