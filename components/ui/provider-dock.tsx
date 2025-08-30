@@ -45,12 +45,12 @@ export function ProviderDock({
           alt="OneDrive"
           width={28}
           height={28}
-          className="rounded-sm"
+          className="rounded-sm opacity-50 grayscale"
         />
       ),
       label: 'OneDrive (Not Available)',
       onClick: () => {}, // Disabled
-      className: 'opacity-50 cursor-not-allowed bg-neutral-200 hover:bg-neutral-200',
+      className: 'opacity-50 cursor-not-allowed bg-neutral-200',
     },
     {
       icon: (
@@ -59,12 +59,12 @@ export function ProviderDock({
           alt="Dropbox"
           width={28}
           height={28}
-          className="rounded-sm"
+          className="rounded-sm opacity-50 grayscale"
         />
       ),
       label: 'Dropbox (Not Available)',
       onClick: () => {}, // Disabled
-      className: 'opacity-50 cursor-not-allowed bg-neutral-200 hover:bg-neutral-200',
+      className: 'opacity-50 cursor-not-allowed bg-neutral-200',
     },
   ];
 
