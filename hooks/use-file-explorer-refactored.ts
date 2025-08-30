@@ -202,7 +202,7 @@ export function useFileExplorerRefactored() {
   const getCurrentPath = useCallback(() => navigationState.getCurrentPath(), [navigationState]);
 
   // Folder management wrapper functions
-  const toggleFolderExpansion = useCallback((folderId: string) => fileNavigation.toggleFolderExpansion(folderId, fileState.setSelectedFiles), [fileNavigation, fileState.setSelectedFiles]);
+  const toggleFolderExpansion = useCallback((folderId: string) => fileNavigation.toggleFolderExpansion(folderId, fileState.setSelectedFiles, fileState.setExpandedFolders), [fileNavigation, fileState.setSelectedFiles, fileState.setExpandedFolders]);
   const isFolderExpanded = useCallback((folderId: string) => fileNavigation.isFolderExpanded(folderId, fileState.expandedFolders), [fileNavigation, fileState.expandedFolders]);
   const getFilesInFolder = useCallback((folderId: string) => fileNavigation.getFilesInFolder(folderId), [fileNavigation]);
   const isFolderLoading = useCallback((folderId: string) => fileNavigation.isFolderLoading(folderId), [fileNavigation]);

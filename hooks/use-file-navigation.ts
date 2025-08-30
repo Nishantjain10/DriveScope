@@ -153,7 +153,7 @@ export function useFileNavigation(
   }, [connectionId, folderContents, getDirectFolderContents, setFolderContents, setLoadingFolders]);
 
   // Toggle folder expansion
-  const toggleFolderExpansion = useCallback(async (folderId: string, setSelectedFiles: (updater: (prev: Set<string>) => Set<string>) => void) => {
+  const toggleFolderExpansion = useCallback(async (folderId: string, setSelectedFiles: (updater: (prev: Set<string>) => Set<string>) => void, setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void) => {
     // Check if folder is currently expanded
     const isCurrentlyExpanded = folderContents[folderId] && folderContents[folderId].length > 0;
     
