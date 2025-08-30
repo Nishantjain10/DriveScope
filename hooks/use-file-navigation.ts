@@ -17,8 +17,10 @@ export function useFileNavigation(
   setLoadingFolders: (updater: (prev: Set<string>) => Set<string>) => void,
   folderContents: Record<string, FileResource[]>,
   loadingFolders: Set<string>,
-  setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void
+  setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void,
+  expandedFolders: Set<string>
 ) {
+
   // Get direct folder contents
   const getDirectFolderContents = useCallback(async (folderId: string): Promise<FileResource[]> => {
     try {
@@ -153,12 +155,15 @@ export function useFileNavigation(
   }, [connectionId, folderContents, getDirectFolderContents, setFolderContents, setLoadingFolders]);
 
   // Toggle folder expansion
-  const toggleFolderExpansion = useCallback(async (folderId: string, setSelectedFiles: (updater: (prev: Set<string>) => Set<string>) => void, setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void) => {
-    // Check if folder is currently expanded
-    const isCurrentlyExpanded = folderContents[folderId] && folderContents[folderId].length > 0;
-    
-    if (isCurrentlyExpanded) {
-      // Folder is expanded, collapse it by removing from expandedFolders
+  const toggleFolderExpansion = useCallback(async (
+    folderId: string,
+    setSelectedFiles: (updater: (prev: Set<string>) => Set<string>) => void,
+    setExpandedFolders: (updater: (prev: Set<string>) => Set<string>) => void
+  ) => {
+    const isExpanded = expandedFolders.has(folderId);
+
+    if (isExpanded) {
+      // Collapse
       setExpandedFolders(prev => {
         const next = new Set(prev);
         next.delete(folderId);
@@ -167,34 +172,42 @@ export function useFileNavigation(
       return;
     }
 
-    // Folder is collapsed, expand it by loading contents and adding to expandedFolders
-    setLoadingFolders(prev => new Set([...prev, folderId]));
-    try {
-      const directFiles = await getDirectFolderContents(folderId);
-      setFolderContents(prev => ({
-        ...prev,
-        [folderId]: directFiles
-      }));
+    // Set expanded state first (like the original working code)
+    setExpandedFolders(prev => new Set([...prev, folderId]));
 
-      // Add to expandedFolders
-      setExpandedFolders(prev => new Set([...prev, folderId]));
-
-      setSelectedFiles(prev => {
-        if (!prev.has(folderId)) return prev;
-        const next = new Set(prev);
-        directFiles.forEach(subFile => next.add(subFile.resource_id));
-        return next;
-      });
-    } catch (error) {
-      toast.error('Failed to load folder contents');
-    } finally {
+    // Only load contents if not already cached
+    if (!folderContents[folderId] && connectionId) {
       setLoadingFolders(prev => {
-        const next = new Set(prev);
-        next.delete(folderId);
+        const next = new Set([...prev, folderId]);
         return next;
       });
+      
+      try {
+        const directFiles = await getDirectFolderContents(folderId);
+        
+        setFolderContents(prev => ({
+          ...prev,
+          [folderId]: directFiles
+        }));
+
+        setSelectedFiles(prev => {
+          if (!prev.has(folderId)) return prev;
+          const next = new Set(prev);
+          directFiles.forEach(subFile => next.add(subFile.resource_id));
+          return next;
+        });
+        
+      } catch (error) {
+        toast.error('Failed to load folder contents');
+      } finally {
+        setLoadingFolders(prev => {
+          const next = new Set(prev);
+          next.delete(folderId);
+          return next;
+        });
+      }
     }
-  }, [folderContents, getDirectFolderContents, setFolderContents, setLoadingFolders, setExpandedFolders]);
+  }, [expandedFolders, folderContents, connectionId, getDirectFolderContents, setFolderContents, setLoadingFolders, setExpandedFolders]);
 
   // Check if folder is expanded
   const isFolderExpanded = useCallback((folderId: string, expandedFolders: Set<string>) => {
