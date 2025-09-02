@@ -14,6 +14,7 @@ import {
     FileIcon,
     FolderIcon,
     Calendar,
+    Type,
 } from "lucide-react";
 
 function useDebounce<T>(value: T, delay: number = 300): T {
@@ -167,6 +168,7 @@ export function FileSearchBar({
                                             onClick={() => handleFilterChange('sortBy', 'name')}
                                             className="sort-name-btn"
                                         >
+                                            <Type className="w-3 h-4 mr-1" />
                                             Name
                                         </Button>
                                         <Button
@@ -183,11 +185,18 @@ export function FileSearchBar({
                                             size="sm"
                                             onClick={handleSortToggle}
                                             className="sort-order-btn"
+                                            title={`Sort ${filters.sortOrder === 'asc' ? 'Ascending' : 'Descending'} - Click to toggle`}
                                         >
                                             {filters.sortOrder === 'asc' ? (
-                                                <SortAsc className="w-4 h-4" />
+                                                <>
+                                                    <SortAsc className="w-4 h-4 mr-1" />
+                                                    <span className="text-xs">Asc.</span>
+                                                </>
                                             ) : (
-                                                <SortDesc className="w-4 h-4" />
+                                                <>
+                                                    <SortDesc className="w-4 h-4 mr-1" />
+                                                    <span className="text-xs">Desc.</span>
+                                                </>
                                             )}
                                         </Button>
                                     </div>
