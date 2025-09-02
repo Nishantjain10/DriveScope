@@ -463,13 +463,6 @@ npm start
 - Use conventional commit messages
 - Ensure all checks pass
 
-### **Code Review Process**
-1. **Automated Checks**: CI/CD pipeline validation
-2. **Peer Review**: Team member code review
-3. **Testing**: Manual and automated testing
-4. **Documentation**: Update relevant docs
-5. **Merge**: Approved changes merged to main
-
 ### **Issue Reporting**
 - Use the issue template
 - Provide detailed reproduction steps
