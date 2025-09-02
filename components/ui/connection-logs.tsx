@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { ChevronUp } from 'lucide-react';
+import { useRef } from 'react';
 import type { Connection } from '@/lib/types/api';
 
 interface LogEntry {
@@ -21,43 +21,16 @@ interface ConnectionLogsProps {
 
 export function ConnectionLogs({ logs, showLogs, connections }: ConnectionLogsProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
-  const [isOpen, setIsOpen] = useState(showLogs);
-  const [mounted, setMounted] = useState(false);
 
-  // Ensure component is mounted to avoid hydration issues
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Sync with parent state
-  useEffect(() => {
-    if (mounted) {
-      setIsOpen(showLogs);
-    }
-  }, [showLogs, mounted]);
-
-  // Handle toggle manually to avoid hydration issues
-  const handleToggle = useCallback(() => {
-    setIsOpen(prev => !prev);
-  }, []);
-
-  // Ensure details element is properly controlled
-  useEffect(() => {
-    if (detailsRef.current && mounted) {
-      if (isOpen) {
-        detailsRef.current.setAttribute('open', '');
-      } else {
-        detailsRef.current.removeAttribute('open');
-      }
-    }
-  }, [isOpen, mounted]);
+  // Auto-open when there are successful connections (but not on initial load)
+  const hasConnections = connections && connections.length > 0;
+  const shouldAutoOpen = showLogs; // Only auto-open based on parent's showLogs prop
 
   return (
     <aside className="fixed bottom-0 flex w-full cursor-pointer border-t border-[#EDEDF0] bg-white">
-      <details ref={detailsRef} className="w-full">
+      <details ref={detailsRef} className="w-full group" open={shouldAutoOpen}>
         <summary 
           className="flex w-full flex-row justify-between p-4 marker:content-none cursor-pointer"
-          onClick={handleToggle}
         >
           <div className="flex gap-2">
             <span className="font-semibold">Connection Logs</span>
@@ -68,21 +41,8 @@ export function ConnectionLogs({ logs, showLogs, connections }: ConnectionLogsPr
             )}
           </div>
           <div className="icon text-xl flex items-center justify-center">
-            {mounted ? (
-              <>
-                {isOpen ? (
-                  <ChevronDown className="w-5 h-5 text-gray-600" />
-                ) : (
-                  <ChevronUp className="w-5 h-5 text-gray-600" />
-                )}
-                {/* Fallback icon in case Lucide icons fail */}
-                <span className="sr-only">
-                  {isOpen ? 'Collapse logs' : 'Expand logs'}
-                </span>
-              </>
-            ) : (
-              <span className="text-gray-600">⌄</span>
-            )}
+            <ChevronUp className="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" />
+            <span className="sr-only">Toggle logs</span>
           </div>
         </summary>
         <div className="flex w-full flex-col lg:flex-row">
