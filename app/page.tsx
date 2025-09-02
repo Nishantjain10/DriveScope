@@ -8,6 +8,7 @@ import { HeroSection } from "@/components/ui/hero-section";
 import { StatusSection } from "@/components/ui/status-section";
 import { ConnectionLogs } from "@/components/ui/connection-logs";
 import { useRouter } from "next/navigation";
+import { getProviderInfo, getProviderAPIName } from "@/lib/utils/provider-info";
 
 interface LogEntry {
   date: Date;
@@ -62,48 +63,32 @@ export default function Home() {
       await refetchConnections();
       
       // Get provider info for logging
-      const providerNames = {
-        'google-drive': 'Google Drive',
-        'onedrive': 'OneDrive',
-        'dropbox': 'Dropbox'
-      };
-      const providerAPIs = {
-        'google-drive': 'gdrive',
-        'onedrive': 'onedrive',
-        'dropbox': 'dropbox'
-      };
+      const providerInfo = getProviderInfo(selectedProvider);
+      const apiProvider = getProviderAPIName(selectedProvider);
       
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections?connection_provider=${providerAPIs[selectedProvider]}&limit=10`,
+        path: `/connections?connection_provider=${apiProvider}&limit=10`,
         status: connections && connections.length > 0 ? 200 : 404,
         response: connections && connections.length > 0 
-          ? `Found ${connections.length} connection(s) for ${providerNames[selectedProvider]}` 
-          : `No connections found for ${providerNames[selectedProvider]}`,
+          ? `Found ${connections.length} connection(s) for ${providerInfo.name}` 
+          : `No connections found for ${providerInfo.name}`,
       };
       setLogs((prevLogs) => [log, ...prevLogs]);
       
       const newStatus = connections && connections.length > 0 ? "success" : "error";
       setProviderStatuses(prev => ({ ...prev, [selectedProvider]: newStatus }));
     } catch (err) {
-      const providerNames = {
-        'google-drive': 'Google Drive',
-        'onedrive': 'OneDrive',
-        'dropbox': 'Dropbox'
-      };
-      const providerAPIs = {
-        'google-drive': 'gdrive',
-        'onedrive': 'onedrive',
-        'dropbox': 'dropbox'
-      };
+      const providerInfo = getProviderInfo(selectedProvider);
+      const apiProvider = getProviderAPIName(selectedProvider);
       
       const log = {
         date: new Date(),
         method: "GET",
-        path: `/connections?connection_provider=${providerAPIs[selectedProvider]}&limit=10`,
+        path: `/connections?connection_provider=${apiProvider}&limit=10`,
         status: 500,
-        response: `Connection failed for ${providerNames[selectedProvider]}: ${err instanceof Error ? err.message : "Unknown error"}`,
+        response: `Connection failed for ${providerInfo.name}: ${err instanceof Error ? err.message : "Unknown error"}`,
       };
       setLogs((prevLogs) => [log, ...prevLogs]);
       setProviderStatuses(prev => ({ ...prev, [selectedProvider]: "error" }));

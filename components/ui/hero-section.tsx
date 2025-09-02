@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Provider } from './provider-dock';
+import { getProviderInfo } from '@/lib/utils/provider-info';
 
 interface HeroSectionProps {
   selectedProvider: Provider;
@@ -9,39 +10,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ selectedProvider, providerStatuses }: HeroSectionProps) {
-  // Get provider display info
-  const getProviderInfo = (provider: Provider) => {
-    switch (provider) {
-      case 'google-drive':
-        return {
-          name: 'Google Drive',
-          logoSrc: '/drive.svg',
-          isSupported: true,
-          apiProvider: 'gdrive',
-        };
-      case 'onedrive':
-        return {
-          name: 'OneDrive',
-          logoSrc: '/ms-onedrive.svg',
-          isSupported: false,
-          apiProvider: 'onedrive',
-        };
-      case 'dropbox':
-        return {
-          name: 'Dropbox',
-          logoSrc: '/dropbox-icon.svg',
-          isSupported: false,
-          apiProvider: 'dropbox',
-        };
-      default:
-        return {
-          name: 'Google Drive',
-          logoSrc: '/drive.svg',
-          isSupported: true,
-          apiProvider: 'gdrive',
-        };
-    }
-  };
+  const providerInfo = getProviderInfo(selectedProvider);
 
   return (
     <div className="mt-16 lg:mt-25 flex w-full max-w-[40em] items-center justify-center px-4">
@@ -74,8 +43,8 @@ export function HeroSection({ selectedProvider, providerStatuses }: HeroSectionP
       <div className="rounded-[25%] border border-[#19191C0A] bg-[#F9F9FA] p-3 shadow-[0px_9.36px_9.36px_0px_hsla(0,0%,0%,0.04)]">
         <div className="rounded-[25%] border border-[#FAFAFB] bg-white p-5 shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] lg:p-9">
           <Image
-            alt={`${getProviderInfo(selectedProvider).name} logo`}
-            src={getProviderInfo(selectedProvider).logoSrc}
+            alt={`${providerInfo.name} logo`}
+            src={providerInfo.logoSrc}
             width={56}
             height={56}
           />
