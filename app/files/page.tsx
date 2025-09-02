@@ -176,34 +176,34 @@ export default function FilesPage() {
           <div className="rounded-lg border border-[#FAFAFB] bg-white shadow-[0px_2px_12px_0px_hsla(0,0%,0%,0.03)] overflow-hidden">
             
             {/* Google Drive-like Header */}
-            <div className="drive-header bg-white border-b border-[#EDEDF0] px-6 py-4">
+            <div className="drive-header bg-white border-b border-[#EDEDF0] px-4 sm:px-6 py-4">
               <div className="header-content flex items-center justify-between">
-                <div className="header-left flex items-center gap-4">
+                <div className="header-left flex items-center gap-2 sm:gap-4">
                   <Link href="/" className="back-button text-[#5F6368] hover:text-zinc-700 transition-colors">
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
-                  <h1 className="page-title text-xl font-normal text-[#202124]">
+                  <h1 className="page-title text-lg sm:text-xl font-normal text-[#202124]">
                     Google Drive
                   </h1>
                 </div>
                 
-                <div className="header-right flex items-center gap-3">
+                <div className="header-right flex items-center gap-1 sm:gap-3">
                   <div className="view-controls flex items-center bg-[#F8F9FA] rounded-lg p-1">
                     <Button
                       variant={viewMode === 'list' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('list')}
-                      className="view-btn h-8 w-8 p-0"
+                      className="view-btn h-7 w-7 sm:h-8 sm:w-8 p-0"
                     >
-                      <List className="w-4 h-4" />
+                      <List className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                     <Button
                       variant={viewMode === 'grid' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('grid')}
-                      className="view-btn h-8 w-8 p-0"
+                      className="view-btn h-7 w-7 sm:h-8 sm:w-8 p-0"
                     >
-                      <Grid3X3 className="w-4 h-4" />
+                      <Grid3X3 className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                   
@@ -212,22 +212,22 @@ export default function FilesPage() {
                     size="sm" 
                     onClick={handleRefresh}
                     disabled={isRefreshing}
-                    className="refresh-btn border-[#DADCE0] hover:border-zinc-400"
+                    className="refresh-btn border-[#DADCE0] hover:border-zinc-400 h-7 sm:h-8 px-2 sm:px-3"
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                    <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${isRefreshing ? 'animate-spin' : ''} sm:mr-2`} />
+                    <span className="hidden sm:inline">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
                   </Button>
                   
-                  <Button size="sm" className="upload-btn">
-                    <Upload className="w-4 h-4 mr-2" />
-                    New
+                  <Button size="sm" className="upload-btn h-7 sm:h-8 px-2 sm:px-3">
+                    <Upload className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">New</span>
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Search Bar */}
-            <div className="search-section bg-white border-b border-[#EDEDF0] px-6 py-3">
+            <div className="search-section bg-white border-b border-[#EDEDF0] px-4 sm:px-6 py-3">
               <div className="search-container max-w-2xl">
                 <FileSearchBar
                   onFiltersChange={handleFiltersChange}

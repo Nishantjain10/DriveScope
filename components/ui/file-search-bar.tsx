@@ -122,15 +122,15 @@ export function FileSearchBar({
     return (
         <div className={`file-search-container w-full ${className}`}>
             {/* Main Search Input */}
-            <div className="search-input-wrapper relative flex items-center gap-2 mb-4">
-                <div className="search-input-group relative w-96">
+            <div className="search-input-wrapper relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+                <div className="search-input-group relative flex-1 sm:w-96">
                     <Search className="search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
                         type="text"
                         placeholder={placeholder}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        className="search-input pl-10 pr-10"
+                        className="search-input pl-10 pr-10 w-full"
                     />
                     {query && (
                         <button
@@ -148,10 +148,10 @@ export function FileSearchBar({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="filter-toggle-btn"
+                                className="filter-toggle-btn w-auto"
                             >
-                                <Filter className="w-4 h-4 mr-2" />
-                                Filters
+                                <Filter className="w-4 h-4 sm:mr-2" />
+                                <span className="sm:inline">Filters</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-80 p-4" align="end">
@@ -250,9 +250,10 @@ export function FileSearchBar({
                             variant="ghost"
                             size="sm"
                             onClick={clearSearch}
-                            className="clear-all-btn text-muted-foreground"
+                            className="clear-all-btn text-muted-foreground w-auto"
                         >
-                            Clear All
+                            <span className="hidden sm:inline">Clear All</span>
+                            <span className="sm:hidden">Clear</span>
                         </Button>
                     )}
                 </div>

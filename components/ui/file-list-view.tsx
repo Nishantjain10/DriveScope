@@ -62,7 +62,8 @@ export function FileListView({
 }: FileListViewProps) {
   return (
     <div className="files-list bg-white rounded-lg border border-[#EDEDF0] overflow-hidden">
-      <Table className="files-table">
+      <div className="overflow-x-auto sm:overflow-x-visible">
+        <Table className="files-table min-w-full">
         <TableHeader>
           <TableRow className="table-header-row border-b border-[#EDEDF0] bg-[#F8F9FA]">
             <TableHead className="selection-column text-[#5F6368] font-medium w-12">
@@ -76,11 +77,11 @@ export function FileListView({
                 className="header-checkbox"
               />
             </TableHead>
-            <TableHead className="name-column text-[#5F6368] font-medium">Name</TableHead>
-            <TableHead className="owner-column text-[#5F6368] font-medium">Owner</TableHead>
-            <TableHead className="modified-column text-[#5F6368] font-medium">Last modified</TableHead>
-            <TableHead className="size-column text-[#5F6368] font-medium">File size</TableHead>
-            <TableHead className="actions-column text-right text-[#5F6368] font-medium">
+            <TableHead className="name-column text-[#5F6368] font-medium w-full max-w-0">Name</TableHead>
+            <TableHead className="owner-column text-[#5F6368] font-medium hidden sm:table-cell">Owner</TableHead>
+            <TableHead className="modified-column text-[#5F6368] font-medium hidden lg:table-cell">Last modified</TableHead>
+            <TableHead className="size-column text-[#5F6368] font-medium hidden md:table-cell">File size</TableHead>
+            <TableHead className="actions-column text-right text-[#5F6368] font-medium w-20">
               Actions
             </TableHead>
           </TableRow>
@@ -117,8 +118,8 @@ export function FileListView({
                     <span className="file-icon">
                       <FileTypeIcon file={file} />
                     </span>
-                    <div className="file-details flex items-center gap-1">
-                      <p className="file-name text-[#202124] text-sm">
+                    <div className="file-details flex items-center gap-1 min-w-0 max-w-[150px] sm:max-w-none">
+                      <p className="file-name text-[#202124] text-sm truncate">
                         {getFileName(file)}
                       </p>
                       {/* Folder Expansion Toggle */}
@@ -140,13 +141,13 @@ export function FileListView({
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="owner-cell text-[#5F6368] text-sm">
+                <TableCell className="owner-cell text-[#5F6368] text-sm hidden sm:table-cell">
                   me
                 </TableCell>
-                <TableCell className="modified-cell text-[#5F6368] text-sm">
+                <TableCell className="modified-cell text-[#5F6368] text-sm hidden lg:table-cell">
                   {new Date(file.updated_at || file.created_at || Date.now()).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="size-cell text-[#5F6368] text-sm">
+                <TableCell className="size-cell text-[#5F6368] text-sm hidden md:table-cell">
                   {getFileSize(file)}
                 </TableCell>
                 <TableCell className="actions-cell text-right">
@@ -171,9 +172,10 @@ export function FileListView({
                   {isFolderLoading(file.resource_id) && (
                     <TableRow className="sub-file-row border-b border-[#EDEDF0] bg-[#FAFAFB]">
                       <TableCell colSpan={6} className="text-center py-4">
-                        <div className="flex items-center justify-center gap-2 text-[#5F6368]">
+                        <div className="flex items-center justify-center gap-2 text-[#5F6368] text-sm sm:text-sm">
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          Loading folder contents...
+                          <span className="hidden sm:inline">Loading folder contents...</span>
+                          <span className="sm:hidden">Loading...</span>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -205,8 +207,8 @@ export function FileListView({
                             <span className="file-icon">
                               <FileTypeIcon file={subFile} />
                             </span>
-                            <div className="file-details flex items-center gap-2">
-                              <p className="file-name text-[#202124] text-sm">
+                            <div className="file-details flex items-center gap-2 min-w-0 max-w-[70px] sm:max-w-none">
+                              <p className="file-name text-[#202124] text-sm truncate">
                                 {getFileName(subFile)}
                               </p>
                               {/* Subfolder Expansion Toggle */}
@@ -228,13 +230,13 @@ export function FileListView({
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="owner-cell text-[#5F6368] text-sm">
+                        <TableCell className="owner-cell text-[#5F6368] text-sm hidden sm:table-cell">
                           me
                         </TableCell>
-                        <TableCell className="modified-cell text-[#5F6368] text-sm">
+                        <TableCell className="modified-cell text-[#5F6368] text-sm hidden lg:table-cell">
                           {new Date(subFile.updated_at || subFile.created_at || Date.now()).toLocaleDateString()}
                         </TableCell>
-                        <TableCell className="size-cell text-[#5F6368] text-sm">
+                        <TableCell className="size-cell text-[#5F6368] text-sm hidden md:table-cell">
                           {getFileSize(subFile)}
                         </TableCell>
                         <TableCell className="actions-cell text-right">
@@ -259,9 +261,10 @@ export function FileListView({
                           {isFolderLoading(subFile.resource_id) && (
                             <TableRow className="sub-sub-file-row border-b border-[#EDEDF0] bg-[#F5F5F5]">
                               <TableCell colSpan={6} className="text-center py-3 pl-12">
-                                <div className="flex items-center justify-center gap-2 text-[#5F6368]">
+                                <div className="flex items-center justify-center gap-2 text-[#5F6368] text-sm sm:text-sm">
                                   <RefreshCw className="w-4 h-4 animate-spin" />
-                                  Loading subfolder contents...
+                                  <span className="hidden sm:inline">Loading subfolder contents...</span>
+                                  <span className="sm:hidden">Loading...</span>
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -293,20 +296,20 @@ export function FileListView({
                                   <span className="file-icon">
                                     <FileTypeIcon file={subSubFile} />
                                   </span>
-                                  <div className="file-details">
-                                    <p className="file-name text-[#202124] text-sm">
+                                  <div className="file-details min-w-0 max-w-[200px] sm:max-w-none">
+                                    <p className="file-name text-[#202124] text-sm truncate">
                                       {getFileName(subSubFile)}
                                     </p>
                                   </div>
                                 </div>
                               </TableCell>
-                              <TableCell className="owner-cell text-[#5F6368] text-sm">
+                              <TableCell className="owner-cell text-[#5F6368] text-sm hidden sm:table-cell">
                                 me
                               </TableCell>
-                              <TableCell className="modified-cell text-[#5F6368] text-sm">
+                              <TableCell className="modified-cell text-[#5F6368] text-sm hidden lg:table-cell">
                                 {new Date(subSubFile.updated_at || subSubFile.created_at || Date.now()).toLocaleDateString()}
                               </TableCell>
-                              <TableCell className="size-cell text-[#5F6368] text-sm">
+                              <TableCell className="size-cell text-[#5F6368] text-sm hidden md:table-cell">
                                 {getFileSize(subSubFile)}
                               </TableCell>
                               <TableCell className="actions-cell text-right">
@@ -333,7 +336,8 @@ export function FileListView({
             </React.Fragment>
           ))}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 }
